@@ -7,6 +7,8 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import plotly.express as px
 from typing import Dict, List, Optional, Tuple
+from src.utils.performance_helpers import optimize_plotly_config, optimize_chart_layout, create_loading_placeholder, create_intersection_observer_trigger
+from src.utils.accessibility_helpers import create_accessible_chart_container, create_aria_label
 
 
 def create_gauge_chart(
@@ -83,24 +85,33 @@ def create_gauge_chart(
         borderpad=4
     )
     
-    fig.update_layout(
-        width=size[0],
-        height=size[1],
-        margin=dict(l=20, r=20, t=60, b=40),  # Increased bottom margin for annotation
-        font={'color': "#333", 'family': 'Arial, sans-serif'},
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)"
-    )
+    # Optimize layout for performance
+    base_layout = {
+        'width': size[0],
+        'height': size[1],
+        'margin': dict(l=20, r=20, t=60, b=40),  # Increased bottom margin for annotation
+        'font': {'color': "#333", 'family': 'Arial, sans-serif'},
+        'paper_bgcolor': "rgba(0,0,0,0)",
+        'plot_bgcolor': "rgba(0,0,0,0)",
+        'title': {
+            'text': title,
+            'font': {'size': 18, 'family': 'Arial, sans-serif'}
+        }
+    }
+    
+    optimized_layout = optimize_chart_layout(base_layout)
+    fig.update_layout(optimized_layout)
     
     return fig
 
 
-def create_primary_gauges_section(primary_metrics: Dict[str, float]) -> Dict[str, go.Figure]:
+def create_primary_gauges_section(primary_metrics: Dict[str, float], lazy_load: bool = False) -> Dict[str, go.Figure]:
     """
-    Create gauge charts for all primary metrics.
+    Create gauge charts for all primary metrics with optional lazy loading.
     
     Args:
         primary_metrics: Dictionary with extraction accuracy metrics
+        lazy_load: Whether to implement lazy loading for performance
     
     Returns:
         Dictionary of gauge charts keyed by metric name
@@ -126,14 +137,106 @@ def create_primary_gauges_section(primary_metrics: Dict[str, float]) -> Dict[str
     gauges = {}
     for config in gauge_configs:
         value = primary_metrics.get(config['key'], 0.0)
-        gauges[config['key']] = create_gauge_chart(
-            value=value,
-            title=config['title'],
-            thresholds=config['thresholds'],
-            size=(350, 280)
-        )
+        
+        if lazy_load:
+            # Create optimized gauge with lazy loading support
+            gauges[config['key']] = create_optimized_gauge_chart(
+                value=value,
+                title=config['title'],
+                thresholds=config['thresholds'],
+                chart_id=f"gauge-{config['key']}"
+            )
+        else:
+            gauges[config['key']] = create_gauge_chart(
+                value=value,
+                title=config['title'],
+                thresholds=config['thresholds'],
+                size=(350, 280)
+            )
     
     return gauges
+
+
+def create_optimized_gauge_chart(
+    value: float,
+    title: str,
+    chart_id: str,
+    thresholds: Optional[Dict[str, float]] = None,
+    max_value: float = 100.0
+) -> go.Figure:
+    """
+    Create an optimized gauge chart with performance enhancements.
+    
+    Args:
+        value: Current metric value
+        title: Chart title
+        chart_id: Unique chart identifier
+        thresholds: Color thresholds
+        max_value: Maximum value for the gauge
+    
+    Returns:
+        Optimized Plotly Figure
+    """
+    if thresholds is None:
+        thresholds = {'excellent': 90, 'good': 75, 'bad': 0}
+    
+    # Determine status for accessibility
+    if value >= thresholds['excellent']:
+        status = 'excellent'
+        gauge_color = '#28a745'
+    elif value >= thresholds['good']:
+        status = 'good'
+        gauge_color = '#ffc107'
+    else:
+        status = 'critical'
+        gauge_color = '#dc3545'
+    
+    # Create gauge with optimized configuration
+    fig = go.Figure(go.Indicator(
+        mode="gauge+number",
+        value=value,
+        domain={'x': [0, 1], 'y': [0, 1]},
+        title={'text': title, 'font': {'size': 16, 'family': 'Inter, Arial, sans-serif'}},
+        gauge={
+            'axis': {
+                'range': [0, max_value],
+                'tickwidth': 1,
+                'tickcolor': "#666",
+                'tickfont': {'size': 10}
+            },
+            'bar': {'color': gauge_color, 'thickness': 0.25},
+            'bgcolor': "white",
+            'borderwidth': 1,
+            'bordercolor': "#ddd",
+            'steps': [
+                {'range': [0, thresholds['good']], 'color': '#fff5f5'},
+                {'range': [thresholds['good'], thresholds['excellent']], 'color': '#fffbf0'},
+                {'range': [thresholds['excellent'], max_value], 'color': '#f0fff4'}
+            ]
+        }
+    ))
+    
+    # Apply optimized layout
+    base_layout = {
+        'width': 320,
+        'height': 250,
+        'margin': dict(l=15, r=15, t=45, b=15),
+        'font': {'color': "#444", 'family': 'Inter, Arial, sans-serif', 'size': 12},
+        'paper_bgcolor': "rgba(0,0,0,0)",
+        'plot_bgcolor': "rgba(0,0,0,0)",
+        'title': {
+            'text': f"{title}<br><sub style='color:{gauge_color}'>{status.title()}</sub>",
+            'font': {'size': 14}
+        }
+    }
+    
+    optimized_layout = optimize_chart_layout(base_layout)
+    fig.update_layout(optimized_layout)
+    
+    # Add ARIA label for accessibility
+    aria_label = create_aria_label('gauge', value, title, status)
+    
+    return fig
 
 
 def create_compact_gauge(
