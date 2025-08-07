@@ -7,7 +7,7 @@ from dash import html, dcc
 import dash_bootstrap_components as dbc
 from typing import Dict, Optional
 import pandas as pd
-from src.components.accessibility_toolbar import create_accessibility_toolbar, create_skip_navigation, create_screen_reader_summary
+from src.components.accessibility_toolbar import create_collapsible_accessibility_toolbar, create_skip_navigation, create_screen_reader_summary
 from src.components.data_table import create_comprehensive_data_view
 from src.utils.accessibility_helpers import create_semantic_section, create_live_region
 from src.utils.performance_helpers import optimize_plotly_config
@@ -92,65 +92,11 @@ def create_control_panel() -> html.Div:
         Control panel HTML Div
     """
     return html.Div([
-        # Accessibility toolbar
-        create_accessibility_toolbar(),
+        # Collapsible accessibility toolbar
+        create_collapsible_accessibility_toolbar(),
         
-        # Compact main controls
-        dbc.Card([
-            dbc.CardBody([
-                html.H6("Dashboard Controls", className="card-title mb-2", id="controls-heading"),
-                dbc.Row([
-                    dbc.Col([
-                        html.Label("View Mode:", className="form-label", htmlFor="view-mode-dropdown"),
-                        dcc.Dropdown(
-                            id='view-mode-dropdown',
-                            options=[
-                                {'label': 'Overview', 'value': 'overview'},
-                                {'label': 'Detailed', 'value': 'detailed'},
-                                {'label': 'Comparison', 'value': 'comparison'}
-                            ],
-                            value='overview',
-                            className="mb-1"
-                        )
-                    ], width=12, md=4),
-                    dbc.Col([
-                        html.Label("Time Range:", className="form-label", htmlFor="time-range-dropdown"),
-                        dcc.Dropdown(
-                            id='time-range-dropdown',
-                            options=[
-                                {'label': '6 Months', 'value': '6m'},
-                                {'label': '1 Year', 'value': '1y'},
-                                {'label': '2 Years', 'value': '2y'},
-                                {'label': 'All Time', 'value': 'all'}
-                            ],
-                            value='1y',
-                            className="mb-1"
-                        )
-                    ], width=12, md=4),
-                    dbc.Col([
-                        html.Label("Actions:", className="form-label"),
-                        dbc.ButtonGroup([
-                            dbc.Button("Refresh", 
-                                     id="refresh-btn", 
-                                     color="primary", 
-                                     size="sm",
-                                     title="Refresh dashboard data"),
-                            dbc.Button("Export", 
-                                     id="export-btn", 
-                                     color="secondary", 
-                                     size="sm",
-                                     title="Export data as CSV file"),
-                            dbc.Button("☰", 
-                                     id="sidebar-toggle", 
-                                     color="light", 
-                                     size="sm",
-                                     title="Toggle sidebar")
-                        ], className="w-100 d-grid")
-                    ], width=12, md=4)
-                ], className="g-2")
-            ], className="py-2")
-        ], className="mb-3")
-    ], id="navigation", role="navigation", **{"aria-label": "Dashboard controls and navigation"})
+        # Action buttons removed per user request
+    ], id="navigation", role="navigation", **{"aria-label": "Dashboard navigation and accessibility controls"})
 
 
 def create_main_content_area(

@@ -242,44 +242,10 @@ def create_dashboard_layout():
 app.layout = create_dashboard_layout()
 
 # Callbacks for interactivity
-@app.callback(
-    Output("offcanvas-sidebar", "is_open"),
-    Input("sidebar-toggle", "n_clicks"),
-    State("offcanvas-sidebar", "is_open"),
-)
-def toggle_offcanvas(n_clicks, is_open):
-    """Toggle sidebar navigation."""
-    if n_clicks:
-        return not is_open
-    return is_open
-
-@app.callback(
-    [Output("loading-output", "children"),
-     Output("metrics-store", "data")],
-    Input("refresh-btn", "n_clicks")
-)
-def refresh_dashboard_data(n_clicks):
-    """Refresh dashboard data when refresh button is clicked."""
-    if n_clicks:
-        try:
-            new_primary_metrics, _, _, error = load_dashboard_data()
-            if error:
-                return html.Div(f"Error: {error}", className="alert alert-danger"), primary_metrics
-            return html.Div("Data refreshed successfully!", className="alert alert-success"), new_primary_metrics
-        except Exception as e:
-            return html.Div(f"Refresh failed: {str(e)}", className="alert alert-danger"), primary_metrics
-    return "", primary_metrics
-
-@app.callback(
-    Output("export-btn", "href"),
-    Input("export-btn", "n_clicks")
-)
-def generate_export_link(n_clicks):
-    """Generate CSV export link."""
-    if n_clicks:
-        # In a real application, this would generate and serve a CSV file
-        return "data:text/csv;charset=utf-8,metric,value\\nExtraction Accuracy,94.2\\nDocument Accuracy,91.8"
-    return ""
+# Removed callbacks for buttons that were removed per user request
+# - offcanvas sidebar toggle
+# - refresh dashboard data  
+# - generate export link
 
 @app.callback(
     [Output("dashboard-container", "className"),
@@ -375,6 +341,17 @@ def toggle_shortcuts_modal(open_clicks, close_clicks, is_open):
     """Toggle keyboard shortcuts modal."""
     ctx = dash.callback_context
     if ctx.triggered:
+        return not is_open
+    return is_open
+
+@app.callback(
+    Output("accessibility-collapse", "is_open"),
+    Input("accessibility-toggle", "n_clicks"),
+    State("accessibility-collapse", "is_open")
+)
+def toggle_accessibility_collapse(n_clicks, is_open):
+    """Toggle accessibility options collapse."""
+    if n_clicks:
         return not is_open
     return is_open
 
