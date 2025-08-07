@@ -83,9 +83,9 @@ def create_quarterly_trend_chart(quarterly_data: pd.DataFrame) -> go.Figure:
     
     fig = go.Figure()
     
-    # Add traces for each field
+    # Add traces for each field with consistent light theme colors
     fields = ['field_1_accuracy', 'field_2_accuracy', 'field_3_accuracy']
-    colors = ['#1f77b4', '#ff7f0e', '#2ca02c']
+    colors = ['#0d6efd', '#198754', '#ffc107']  # Light theme colors: blue, success, warning
     names = ['Field 1', 'Field 2', 'Field 3']
     
     for field, color, name in zip(fields, colors, names):
@@ -103,32 +103,39 @@ def create_quarterly_trend_chart(quarterly_data: pd.DataFrame) -> go.Figure:
     fig.update_layout(
         title=dict(
             text="Quarterly Field Accuracy Trends",
-            font={'size': 20, 'family': 'Inter, Arial, sans-serif'}
+            font={'size': 16, 'family': 'Inter, sans-serif', 'color': '#212529'}
         ),
         xaxis_title="Quarter",
         yaxis_title="Accuracy (%)",
-        height=500,  # Increased height
-        width=None,  # Let it be responsive
-        margin=dict(l=60, r=60, t=80, b=60),  # Increased margins
-        font={'family': 'Inter, Arial, sans-serif', 'size': 12},
+        height=380,  # Compact height
+        margin=dict(l=40, r=20, t=50, b=40),  # Compact margins
+        font={'family': 'Inter, sans-serif', 'size': 11, 'color': '#212529'},
         paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(255,255,255,1)",
+        plot_bgcolor="#ffffff",
         legend=dict(
             orientation="h",
             yanchor="bottom",
-            y=-0.15,  # Move legend below chart
+            y=-0.15,
             xanchor="center",
-            x=0.5
+            x=0.5,
+            font={'size': 10}
         ),
         hovermode='x unified',
-        autosize=True  # Enable autosizing
+        autosize=True
     )
     
-    # Add grid and styling
-    fig.update_xaxes(showgrid=True, gridcolor='rgba(128,128,128,0.2)')
+    # Add grid and styling with light theme
+    fig.update_xaxes(
+        showgrid=True, 
+        gridcolor='#e9ecef',
+        gridwidth=1,
+        linecolor='#dee2e6'
+    )
     fig.update_yaxes(
         showgrid=True, 
-        gridcolor='rgba(128,128,128,0.2)',
+        gridcolor='#e9ecef',
+        gridwidth=1,
+        linecolor='#dee2e6',
         range=[75, 100]  # Focus on relevant accuracy range
     )
     
@@ -177,13 +184,15 @@ def create_monthly_heatmap(monthly_data: pd.DataFrame) -> go.Figure:
         fig.update_layout(
             title=dict(
                 text="Monthly Field 1 Accuracy Heatmap",
-                font={'size': 20, 'family': 'Inter, Arial, sans-serif'}
+                font={'size': 16, 'family': 'Inter, sans-serif', 'color': '#212529'}
             ),
             xaxis_title="Month",
             yaxis_title="Year",
-            height=450,  # Increased height
-            margin=dict(l=60, r=60, t=80, b=60),
-            font={'family': 'Inter, Arial, sans-serif', 'size': 12},
+            height=350,  # Compact height
+            margin=dict(l=40, r=20, t=50, b=40),  # Compact margins
+            font={'family': 'Inter, sans-serif', 'size': 11, 'color': '#212529'},
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="#ffffff",
             autosize=True
         )
         
@@ -272,8 +281,105 @@ def generate_export_link(n_clicks):
         return "data:text/csv;charset=utf-8,metric,value\\nExtraction Accuracy,94.2\\nDocument Accuracy,91.8"
     return ""
 
+@app.callback(
+    [Output("dashboard-container", "className"),
+     Output("accessibility-state", "data"),
+     Output("normal-theme-btn", "active"),
+     Output("high-contrast-btn", "active"),
+     Output("text-small-btn", "active"),
+     Output("text-normal-btn", "active"),
+     Output("text-large-btn", "active")],
+    [Input("normal-theme-btn", "n_clicks"),
+     Input("high-contrast-btn", "n_clicks"),
+     Input("text-small-btn", "n_clicks"),
+     Input("text-normal-btn", "n_clicks"),
+     Input("text-large-btn", "n_clicks"),
+     Input("accessibility-features", "value")],
+    State("accessibility-state", "data")
+)
+def update_accessibility_settings(normal_clicks, contrast_clicks, small_clicks, 
+                                normal_text_clicks, large_clicks, features, current_state):
+    """Handle accessibility settings changes."""
+    if current_state is None:
+        current_state = {
+            "high_contrast": False,
+            "text_size": "normal",
+            "screen_reader_mode": False,
+            "colorblind_mode": False
+        }
+    
+    ctx = dash.callback_context
+    if not ctx.triggered:
+        # Initial load - ensure light theme
+        base_classes = "dashboard-container light-theme"
+        return (base_classes, current_state, 
+                True, False, False, True, False)  # Normal theme and text active
+    
+    button_id = ctx.triggered[0]['prop_id'].split('.')[0]
+    
+    # Handle theme buttons
+    if button_id == "normal-theme-btn":
+        current_state["high_contrast"] = False
+    elif button_id == "high-contrast-btn":
+        current_state["high_contrast"] = True
+    
+    # Handle text size buttons
+    elif button_id == "text-small-btn":
+        current_state["text_size"] = "small"
+    elif button_id == "text-normal-btn":
+        current_state["text_size"] = "normal"
+    elif button_id == "text-large-btn":
+        current_state["text_size"] = "large"
+    
+    # Handle additional features
+    if features:
+        current_state["screen_reader_mode"] = "screen_reader_mode" in features
+        current_state["colorblind_mode"] = "colorblind_mode" in features
+    else:
+        current_state["screen_reader_mode"] = False
+        current_state["colorblind_mode"] = False
+    
+    # Build CSS classes - ensure light theme is default
+    classes = ["dashboard-container", "light-theme"]
+    
+    if current_state.get("high_contrast", False):
+        classes.append("high-contrast-mode")
+    
+    text_size = current_state.get("text_size", "normal")
+    classes.append(f"text-size-{text_size}")
+    
+    if current_state.get("colorblind_mode", False):
+        classes.append("colorblind-friendly")
+    
+    if current_state.get("screen_reader_mode", False):
+        classes.append("screen-reader-mode")
+    
+    # Button active states
+    theme_normal_active = not current_state.get("high_contrast", False)
+    theme_contrast_active = current_state.get("high_contrast", False)
+    text_small_active = text_size == "small"
+    text_normal_active = text_size == "normal"
+    text_large_active = text_size == "large"
+    
+    return (" ".join(classes), current_state,
+            theme_normal_active, theme_contrast_active,
+            text_small_active, text_normal_active, text_large_active)
 
-# Add custom CSS
+@app.callback(
+    Output("keyboard-shortcuts-modal", "is_open"),
+    [Input("keyboard-shortcuts-btn", "n_clicks"),
+     Input("close-shortcuts-modal", "n_clicks")],
+    State("keyboard-shortcuts-modal", "is_open")
+)
+def toggle_shortcuts_modal(open_clicks, close_clicks, is_open):
+    """Toggle keyboard shortcuts modal."""
+    ctx = dash.callback_context
+    if ctx.triggered:
+        return not is_open
+    return is_open
+
+
+# Add custom CSS - Compact Light Theme
 app.index_string = '''
 <!DOCTYPE html>
 <html>
@@ -283,93 +389,312 @@ app.index_string = '''
         {%favicon%}
         {%css%}
         <style>
-            body {
-                font-family: 'Inter', 'Arial', sans-serif;
-                background-color: #f8f9fa;
+            :root {
+                /* Light Theme Color Palette */
+                --bg-primary: #ffffff;
+                --bg-secondary: #f8f9fa;
+                --bg-light: #e9ecef;
+                --text-primary: #212529;
+                --text-secondary: #6c757d;
+                --text-muted: #adb5bd;
+                --border-light: #dee2e6;
+                --border-medium: #ced4da;
+                --accent-blue: #0d6efd;
+                --accent-success: #198754;
+                --accent-warning: #ffc107;
+                --accent-danger: #dc3545;
+                --shadow-light: rgba(0,0,0,0.05);
+                --shadow-medium: rgba(0,0,0,0.1);
+                
+                /* Compact spacing variables */
+                --spacing-xs: 0.25rem;
+                --spacing-sm: 0.5rem;
+                --spacing-md: 0.75rem;
+                --spacing-lg: 1rem;
+                --spacing-xl: 1.5rem;
             }
+
+            body {
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                background-color: var(--bg-secondary);
+                color: var(--text-primary);
+                font-size: 14px;
+                line-height: 1.4;
+            }
+            
+            /* Ensure light theme is enforced */
+            .light-theme,
+            .light-theme body,
+            .dashboard-container.light-theme {
+                background-color: var(--bg-secondary) !important;
+                color: var(--text-primary) !important;
+            }
+            
+            .light-theme .card,
+            .light-theme .gauge-chart,
+            .light-theme .quarterly-chart,
+            .light-theme .monthly-chart {
+                background-color: var(--bg-primary) !important;
+                color: var(--text-primary) !important;
+            }
+            
             .dashboard-container {
                 min-height: 100vh;
+                padding: var(--spacing-md) var(--spacing-sm);
             }
+            
+            /* Compact Cards */
+            .card {
+                border: 1px solid var(--border-light);
+                border-radius: 6px;
+                box-shadow: 0 1px 3px var(--shadow-light);
+                margin-bottom: var(--spacing-lg);
+                transition: box-shadow 0.15s ease;
+            }
+            
+            .card:hover {
+                box-shadow: 0 2px 8px var(--shadow-medium);
+            }
+            
+            .card-body {
+                padding: var(--spacing-lg);
+            }
+            
+            .card-header {
+                padding: var(--spacing-md) var(--spacing-lg);
+                background-color: var(--bg-light);
+                border-bottom: 1px solid var(--border-light);
+                font-weight: 600;
+                font-size: 0.9rem;
+            }
+            
+            /* Compact Charts */
             .gauge-chart, .quarterly-chart, .monthly-chart {
-                background-color: white;
-                border-radius: 8px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                padding: 1rem;
-                margin-bottom: 2rem;
-                min-height: 400px;
+                background-color: var(--bg-primary);
+                border-radius: 6px;
+                border: 1px solid var(--border-light);
+                padding: var(--spacing-md);
+                margin-bottom: var(--spacing-lg);
+            }
+            
+            .gauge-chart {
+                min-height: 280px;
             }
             
             .quarterly-chart {
-                min-height: 550px;
+                min-height: 380px;
             }
             
             .monthly-chart {
-                min-height: 500px;
+                min-height: 350px;
             }
             
-            /* Monthly Carousel Styling */
+            /* Compact Typography */
+            h1 {
+                font-size: 1.75rem;
+                font-weight: 700;
+                color: var(--text-primary);
+                margin-bottom: var(--spacing-md);
+                line-height: 1.2;
+            }
+            
+            h2 {
+                font-size: 1.25rem;
+                font-weight: 600;
+                color: var(--text-primary);
+                margin-bottom: var(--spacing-sm);
+            }
+            
+            h3 {
+                font-size: 1.1rem;
+                font-weight: 600;
+                color: var(--text-primary);
+                margin-bottom: var(--spacing-sm);
+            }
+            
+            .text-muted {
+                color: var(--text-muted) !important;
+                font-size: 0.85rem;
+            }
+            
+            /* Compact Buttons */
+            .btn {
+                padding: var(--spacing-xs) var(--spacing-md);
+                font-size: 0.875rem;
+                font-weight: 500;
+                border-radius: 4px;
+                border: 1px solid transparent;
+                transition: all 0.15s ease;
+            }
+            
+            .btn-sm {
+                padding: 0.125rem var(--spacing-sm);
+                font-size: 0.8rem;
+            }
+            
+            .btn-primary {
+                background-color: var(--accent-blue);
+                border-color: var(--accent-blue);
+                color: white;
+            }
+            
+            .btn-primary:hover {
+                background-color: #0b5ed7;
+                border-color: #0a58ca;
+            }
+            
+            .btn-outline-secondary {
+                border-color: var(--border-medium);
+                color: var(--text-secondary);
+            }
+            
+            .btn-outline-secondary:hover {
+                background-color: var(--text-secondary);
+                color: white;
+            }
+            
+            /* Compact Forms */
+            .form-control, .form-select {
+                padding: var(--spacing-xs) var(--spacing-sm);
+                font-size: 0.875rem;
+                border: 1px solid var(--border-medium);
+                border-radius: 4px;
+                background-color: var(--bg-primary);
+            }
+            
+            .form-label {
+                font-size: 0.85rem;
+                font-weight: 500;
+                color: var(--text-primary);
+                margin-bottom: 0.25rem;
+            }
+            
+            /* Compact Monthly Carousel */
             .monthly-carousel-container {
-                padding: 2rem 1rem;
+                padding: var(--spacing-lg) var(--spacing-sm);
             }
             
             .carousel-wrapper {
-                min-height: 400px;
-                padding: 1rem 0;
+                min-height: 320px;
+                padding: var(--spacing-sm) 0;
             }
             
             .month-card {
-                transition: all 0.3s ease;
+                transition: all 0.2s ease;
                 height: 100%;
             }
             
             .month-card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 8px 16px rgba(0,0,0,0.15) !important;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px var(--shadow-medium);
             }
             
-            /* Ensure consistent card heights */
             .month-card .card {
                 height: 100%;
-                display: flex;
-                flex-direction: column;
+                border: 1px solid var(--border-light);
             }
             
             .month-card .card-body {
+                padding: var(--spacing-md);
                 flex: 1;
                 display: flex;
                 flex-direction: column;
                 justify-content: space-between;
             }
             
-            .carousel-indicator {
-                transition: all 0.2s ease;
+            /* Compact Navigation */
+            .navbar, .nav {
+                padding: var(--spacing-sm) 0;
             }
             
-            .carousel-indicator:hover {
-                transform: scale(1.2);
+            .nav-link {
+                padding: var(--spacing-xs) var(--spacing-md);
+                font-size: 0.875rem;
+                color: var(--text-secondary);
             }
+            
+            .nav-link:hover {
+                color: var(--accent-blue);
+            }
+            
+            /* Accessibility Toolbar Compact */
+            .accessibility-toolbar {
+                position: sticky;
+                top: var(--spacing-sm);
+                z-index: 10;
+            }
+            
+            .accessibility-toolbar .card {
+                margin-bottom: var(--spacing-md);
+            }
+            
+            .accessibility-toolbar .btn-group {
+                gap: 1px;
+            }
+            
+            .accessibility-toolbar .btn-group .btn {
+                padding: 0.125rem 0.375rem;
+                font-size: 0.75rem;
+            }
+            
+            /* Responsive Design */
             @media (max-width: 768px) {
                 .dashboard-container {
-                    padding: 0.5rem;
+                    padding: var(--spacing-sm) var(--spacing-xs);
                 }
+                
                 h1 {
-                    font-size: 1.8rem !important;
+                    font-size: 1.5rem;
                 }
-                h3 {
-                    font-size: 1.4rem !important;
+                
+                .card-body {
+                    padding: var(--spacing-md);
+                }
+                
+                .gauge-chart, .quarterly-chart, .monthly-chart {
+                    padding: var(--spacing-sm);
                 }
             }
-            /* Accessibility improvements */
-            .btn:focus, .form-select:focus, .form-control:focus {
-                box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-            }
-            /* High contrast mode support */
-            @media (prefers-contrast: high) {
-                .card {
-                    border: 2px solid !important;
+            
+            @media (max-width: 576px) {
+                h1 {
+                    font-size: 1.25rem;
                 }
+                
                 .btn {
-                    border: 2px solid !important;
+                    font-size: 0.8rem;
+                    padding: 0.125rem var(--spacing-sm);
+                }
+            }
+            
+            /* Focus and Accessibility */
+            .btn:focus, .form-select:focus, .form-control:focus {
+                box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+                outline: none;
+            }
+            
+            /* High contrast support */
+            @media (prefers-contrast: high) {
+                :root {
+                    --border-light: #000000;
+                    --border-medium: #000000;
+                    --shadow-light: rgba(0,0,0,0.3);
+                    --shadow-medium: rgba(0,0,0,0.5);
+                }
+                
+                .card {
+                    border: 2px solid var(--border-light);
+                }
+                
+                .btn {
+                    border-width: 2px;
+                }
+            }
+            
+            /* Reduced motion support */
+            @media (prefers-reduced-motion: reduce) {
+                .month-card, .card, .btn {
+                    transition: none;
                 }
             }
         </style>

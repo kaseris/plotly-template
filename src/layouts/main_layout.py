@@ -15,7 +15,7 @@ from src.utils.performance_helpers import optimize_plotly_config
 
 def create_header_section(last_updated: Optional[str] = None) -> html.Div:
     """
-    Create the dashboard header with title and last updated timestamp.
+    Create compact dashboard header with title and last updated timestamp.
     
     Args:
         last_updated: Last updated timestamp string
@@ -32,21 +32,14 @@ def create_header_section(last_updated: Optional[str] = None) -> html.Div:
             dbc.Col([
                 html.H1("Extraction Accuracy Dashboard", 
                        id="main-title",
-                       className="text-center mb-2",
-                       style={
-                           'fontSize': '2.5rem',
-                           'fontWeight': 'bold',
-                           'color': '#2c3e50',
-                           'marginBottom': '0.5rem'
-                       },
+                       className="text-center mb-1",
                        role="banner"),
                 html.P(f"Last Updated: {last_updated}", 
-                      className="text-center text-muted",
-                      style={'fontSize': '1rem', 'marginBottom': '2rem'},
+                      className="text-center text-muted mb-2",
                       **{"aria-live": "polite"})
             ], width=12)
-        ])
-    ], className="mb-4", style={'paddingTop': '1rem'})
+        ], className="g-0")
+    ], className="mb-3")
 
 
 def create_navigation_sidebar() -> dbc.Offcanvas:
@@ -93,7 +86,7 @@ def create_navigation_sidebar() -> dbc.Offcanvas:
 
 def create_control_panel() -> html.Div:
     """
-    Create control panel with filters and actions.
+    Create compact control panel with filters and actions.
     
     Returns:
         Control panel HTML Div
@@ -102,13 +95,13 @@ def create_control_panel() -> html.Div:
         # Accessibility toolbar
         create_accessibility_toolbar(),
         
-        # Main controls
+        # Compact main controls
         dbc.Card([
             dbc.CardBody([
-                html.H6("Dashboard Controls", className="card-title mb-3", id="controls-heading"),
+                html.H6("Dashboard Controls", className="card-title mb-2", id="controls-heading"),
                 dbc.Row([
                     dbc.Col([
-                        html.Label("View Mode:", className="form-label small", htmlFor="view-mode-dropdown"),
+                        html.Label("View Mode:", className="form-label", htmlFor="view-mode-dropdown"),
                         dcc.Dropdown(
                             id='view-mode-dropdown',
                             options=[
@@ -117,33 +110,32 @@ def create_control_panel() -> html.Div:
                                 {'label': 'Comparison', 'value': 'comparison'}
                             ],
                             value='overview',
-                            className="mb-2"
+                            className="mb-1"
                         )
-                    ], width=12, md=6),
+                    ], width=12, md=4),
                     dbc.Col([
-                        html.Label("Time Range:", className="form-label small", htmlFor="time-range-dropdown"),
+                        html.Label("Time Range:", className="form-label", htmlFor="time-range-dropdown"),
                         dcc.Dropdown(
                             id='time-range-dropdown',
                             options=[
-                                {'label': 'Last 6 Months', 'value': '6m'},
-                                {'label': 'Last Year', 'value': '1y'},
-                                {'label': 'Last 2 Years', 'value': '2y'},
+                                {'label': '6 Months', 'value': '6m'},
+                                {'label': '1 Year', 'value': '1y'},
+                                {'label': '2 Years', 'value': '2y'},
                                 {'label': 'All Time', 'value': 'all'}
                             ],
                             value='1y',
-                            className="mb-2"
+                            className="mb-1"
                         )
-                    ], width=12, md=6)
-                ], className="g-2"),
-                dbc.Row([
+                    ], width=12, md=4),
                     dbc.Col([
+                        html.Label("Actions:", className="form-label"),
                         dbc.ButtonGroup([
-                            dbc.Button("Refresh Data", 
+                            dbc.Button("Refresh", 
                                      id="refresh-btn", 
                                      color="primary", 
                                      size="sm",
-                                     title="Refresh dashboard data (Alt+R)"),
-                            dbc.Button("Export CSV", 
+                                     title="Refresh dashboard data"),
+                            dbc.Button("Export", 
                                      id="export-btn", 
                                      color="secondary", 
                                      size="sm",
@@ -152,12 +144,12 @@ def create_control_panel() -> html.Div:
                                      id="sidebar-toggle", 
                                      color="light", 
                                      size="sm",
-                                     title="Toggle navigation sidebar")
-                        ], className="w-100")
-                    ], width=12)
-                ], className="mt-2")
-            ])
-        ], className="shadow-sm mb-4")
+                                     title="Toggle sidebar")
+                        ], className="w-100 d-grid")
+                    ], width=12, md=4)
+                ], className="g-2")
+            ], className="py-2")
+        ], className="mb-3")
     ], id="navigation", role="navigation", **{"aria-label": "Dashboard controls and navigation"})
 
 
@@ -169,7 +161,7 @@ def create_main_content_area(
     monthly_data: Optional[object] = None
 ) -> html.Div:
     """
-    Create main content area with responsive grid layout.
+    Create compact main content area with responsive grid layout.
     
     Args:
         kpi_section: KPI cards section
@@ -181,14 +173,14 @@ def create_main_content_area(
     """
     content_sections = []
     
-    # Primary KPI Section (always visible)
+    # Compact KPI Section
     content_sections.append(
         html.Section([
             html.Div(kpi_section, id="overview")
-        ], className="mb-5", **{'aria-label': 'Key Performance Indicators'})
+        ], className="mb-3", **{'aria-label': 'Key Performance Indicators'})
     )
     
-    # Gauge Charts Section
+    # Compact Gauge Charts Section
     if gauge_charts:
         gauge_row = []
         for chart_name, chart_fig in gauge_charts.items():
@@ -200,27 +192,25 @@ def create_main_content_area(
                         className="gauge-chart",
                         id=f"gauge-{chart_name}"
                     )
-                ], width=12, lg=4, className="mb-3")
+                ], width=12, md=6, lg=4, className="mb-2")
             )
         
         content_sections.append(
             html.Section([
-                html.H3("Accuracy Gauges", 
-                       className="mb-4 text-center",
-                       style={'fontSize': '1.6rem', 'color': '#34495e'}),
-                dbc.Row(gauge_row, className="g-3 justify-content-center")
-            ], className="mb-5", **{'aria-label': 'Accuracy Gauge Charts'})
+                html.H3("Accuracy Gauges", className="mb-2 text-center h5"),
+                dbc.Row(gauge_row, className="g-2 justify-content-center")
+            ], className="mb-3", **{'aria-label': 'Accuracy Gauge Charts'})
         )
     
-    # Monthly Carousel Section
+    # Compact Monthly Carousel Section
     if monthly_carousel:
         content_sections.append(
             html.Section([
                 html.Div(monthly_carousel, id="monthly-carousel-section")
-            ], className="mb-5", **{'aria-label': 'Monthly Performance Carousel'})
+            ], className="mb-3", **{'aria-label': 'Monthly Performance Carousel'})
         )
     
-    # Data Tables Section for Accessibility
+    # Compact Data Tables Section for Accessibility
     if primary_metrics:
         content_sections.append(
             html.Section([
@@ -230,7 +220,7 @@ def create_main_content_area(
                 )
             ], 
             id="data-tables-section",
-            className="mb-5 screen-reader-enhanced", 
+            className="mb-3 screen-reader-enhanced", 
             **{'aria-label': 'Data tables for screen readers'})
         )
     
@@ -239,26 +229,26 @@ def create_main_content_area(
 
 def create_footer_section() -> html.Div:
     """
-    Create dashboard footer with accessibility and help information.
+    Create compact dashboard footer with accessibility and help information.
     
     Returns:
         Footer section HTML Div
     """
     return html.Footer([
-        html.Hr(),
+        html.Hr(className="my-2"),
         dbc.Row([
             dbc.Col([
                 html.P([
-                    "Dashboard built with ",
-                    html.A("Plotly Dash", href="https://dash.plotly.com/", target="_blank"),
-                    " | ",
-                    html.A("Accessibility Info", href="#help", id="accessibility-link"),
-                    " | ",
-                    html.A("Keyboard Shortcuts", href="#help", id="shortcuts-link")
+                    "Built with ",
+                    html.A("Plotly Dash", href="https://dash.plotly.com/", target="_blank", className="text-decoration-none"),
+                    " • ",
+                    html.A("Accessibility", href="#help", id="accessibility-link", className="text-decoration-none"),
+                    " • ",
+                    html.A("Shortcuts", href="#help", id="shortcuts-link", className="text-decoration-none")
                 ], className="text-muted small mb-0")
             ], width=12, className="text-center")
-        ])
-    ], className="mt-5 py-3", style={'borderTop': '1px solid #dee2e6'})
+        ], className="g-0")
+    ], className="mt-3 py-2")
 
 
 def create_responsive_layout(
@@ -329,7 +319,7 @@ def create_responsive_layout(
             ),
             style={'position': 'fixed', 'top': '50%', 'left': '50%', 'transform': 'translate(-50%, -50%)'}
         )
-    ], id="dashboard-container", className="dashboard-container", lang="en")
+    ], id="dashboard-container", className="dashboard-container light-theme", lang="en")
 
 
 def get_responsive_breakpoints() -> Dict[str, str]:

@@ -32,7 +32,7 @@ def create_accessibility_toolbar(
                     html.H6([
                         html.I(className="fas fa-universal-access me-2", **{"aria-hidden": "true"}),
                         "Accessibility Options"
-                    ], className="card-title mb-3"),
+                    ], className="card-title mb-2 h6"),
                     
                     # Theme and contrast controls
                     html.Div([

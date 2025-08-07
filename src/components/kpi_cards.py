@@ -16,7 +16,7 @@ def create_kpi_card(
     color_threshold: Optional[Dict[str, float]] = None
 ) -> dbc.Card:
     """
-    Create a single KPI card with value, trend, and color coding.
+    Create a compact KPI card with light theme styling.
     
     Args:
         title: Card title
@@ -31,59 +31,80 @@ def create_kpi_card(
     if color_threshold is None:
         color_threshold = {'excellent': 95, 'good': 90}
     
-    # Determine card color based on value
+    # Light theme color determination with subtle backgrounds
     if value >= color_threshold['excellent']:
-        card_color = 'success'
-        text_color = 'white'
+        card_style = {
+            'backgroundColor': '#d1edff',  # Light blue background
+            'borderLeft': '4px solid #0d6efd',
+            'color': '#212529'
+        }
+        badge_color = 'primary'
     elif value >= color_threshold['good']:
-        card_color = 'warning'
-        text_color = 'dark'
+        card_style = {
+            'backgroundColor': '#d4f6d4',  # Light green background
+            'borderLeft': '4px solid #198754',
+            'color': '#212529'
+        }
+        badge_color = 'success'
     else:
-        card_color = 'danger'
-        text_color = 'white'
+        card_style = {
+            'backgroundColor': '#ffeaa7',  # Light yellow background
+            'borderLeft': '4px solid #ffc107',
+            'color': '#212529'
+        }
+        badge_color = 'warning'
     
-    # Trend icon
+    # Compact trend icon
     trend_icon = ""
+    trend_text = ""
     if trend == 'up':
-        trend_icon = "↗️"
+        trend_icon = "▲"
+        trend_text = "Improving"
     elif trend == 'down':
-        trend_icon = "↘️"
+        trend_icon = "▼"
+        trend_text = "Declining"
     elif trend == 'stable':
-        trend_icon = "→"
+        trend_icon = "■"
+        trend_text = "Stable"
     
-    # Card content
+    # Compact card content
     card_body = [
-        html.H4(title, className="card-title text-center mb-2", 
-                style={'fontSize': '1.1rem', 'fontWeight': '600'}),
         html.Div([
-            html.H1(f"{value}%", 
-                    className="text-center mb-1",
-                    style={'fontSize': '2.5rem', 'fontWeight': 'bold', 'lineHeight': '1'}),
-            html.P(trend_icon, className="text-center mb-0", style={'fontSize': '1.2rem'})
-        ], className="d-flex flex-column align-items-center"),
+            html.H5(title, className="mb-1", 
+                    style={'fontSize': '0.9rem', 'fontWeight': '600', 'color': '#212529'}),
+            html.Div([
+                html.Span(f"{value}%", 
+                         className="fw-bold",
+                         style={'fontSize': '1.8rem', 'color': '#212529'}),
+                dbc.Badge([trend_icon, f" {trend_text}"], 
+                         color=badge_color, 
+                         className="ms-2",
+                         style={'fontSize': '0.7rem'})
+            ], className="d-flex align-items-center justify-content-between")
+        ])
     ]
     
     if subtitle:
         card_body.append(
-            html.P(subtitle, className="card-text text-center small",
-                   style={'fontSize': '0.85rem', 'opacity': '0.9'})
+            html.P(subtitle, className="text-muted mb-0 mt-1",
+                   style={'fontSize': '0.75rem'})
         )
     
     return dbc.Card(
-        dbc.CardBody(card_body),
-        color=card_color,
-        className="h-100 shadow-sm",
+        dbc.CardBody(card_body, className="py-2 px-3"),
+        className="h-100",
         style={
-            'minHeight': '160px',
-            'border': 'none',
-            'borderRadius': '8px'
+            **card_style,
+            'minHeight': '100px',
+            'border': '1px solid #dee2e6',
+            'borderRadius': '6px'
         }
     )
 
 
 def create_primary_kpi_section(primary_metrics: Dict[str, float]) -> html.Div:
     """
-    Create the primary KPI cards section with all three main metrics.
+    Create compact primary KPI cards section with light theme styling.
     
     Args:
         primary_metrics: Dictionary with extraction accuracy metrics
@@ -96,21 +117,21 @@ def create_primary_kpi_section(primary_metrics: Dict[str, float]) -> html.Div:
         {
             'key': 'extraction_accuracy',
             'title': 'Extraction Accuracy',
-            'subtitle': 'Overall system performance'
+            'subtitle': 'Overall performance'
         },
         {
             'key': 'document_accuracy',
             'title': 'Document Accuracy',
-            'subtitle': 'Document-level success'
+            'subtitle': 'Document success'
         },
         {
             'key': 'all_fields_accuracy',
             'title': 'All Fields Accuracy',
-            'subtitle': 'Complete field extraction'
+            'subtitle': 'Complete extraction'
         }
     ]
     
-    # Create KPI cards
+    # Create compact KPI cards
     kpi_cards = []
     for config in kpi_configs:
         value = primary_metrics.get(config['key'], 0.0)
@@ -124,14 +145,14 @@ def create_primary_kpi_section(primary_metrics: Dict[str, float]) -> html.Div:
             subtitle=config['subtitle'],
             trend=trend
         )
-        kpi_cards.append(dbc.Col(card, width=12, md=4, className="mb-3"))
+        kpi_cards.append(dbc.Col(card, width=12, sm=6, lg=4, className="mb-2"))
     
     return html.Div([
         html.H2("Key Performance Indicators", 
-                className="mb-4 text-center",
-                style={'fontSize': '1.8rem', 'fontWeight': '600', 'color': '#2c3e50'}),
-        dbc.Row(kpi_cards, className="g-3")
-    ], className="mb-5")
+                className="mb-2 h5 text-center",
+                style={'fontWeight': '600', 'color': '#212529'}),
+        dbc.Row(kpi_cards, className="g-2")
+    ], className="mb-3")
 
 
 def create_summary_stats_card(quarterly_data, monthly_data) -> dbc.Card:
