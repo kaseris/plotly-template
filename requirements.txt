@@ -1,0 +1,18 @@
+# Core Dashboard Framework
+dash
+plotly==5.18.0
+dash-bootstrap-components
+
+# Data Processing
+pandas==2.1.4
+numpy==1.24.3
+
+# Development and Testing
+pytest==7.4.3
+pytest-dash
+black==23.12.1
+flake8==6.1.0
+
+# Optional: Enhanced Features
+dash-extensions==1.0.13
+gunicorn==21.2.0

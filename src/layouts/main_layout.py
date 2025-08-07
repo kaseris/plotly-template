@@ -1,0 +1,293 @@
+"""
+Main dashboard layout with responsive design and accessibility features.
+Implements the layout strategy outlined in the CLAUDE.md plan.
+"""
+
+from dash import html, dcc
+import dash_bootstrap_components as dbc
+from typing import Dict, Optional
+import pandas as pd
+
+
+def create_header_section(last_updated: Optional[str] = None) -> html.Div:
+    """
+    Create the dashboard header with title and last updated timestamp.
+    
+    Args:
+        last_updated: Last updated timestamp string
+    
+    Returns:
+        Header section HTML Div
+    """
+    if last_updated is None:
+        from datetime import datetime
+        last_updated = datetime.now().strftime("%Y-%m-%d %H:%M")
+    
+    return html.Div([
+        dbc.Row([
+            dbc.Col([
+                html.H1("Extraction Accuracy Dashboard", 
+                       className="text-center mb-2",
+                       style={
+                           'fontSize': '2.5rem',
+                           'fontWeight': 'bold',
+                           'color': '#2c3e50',
+                           'marginBottom': '0.5rem'
+                       }),
+                html.P(f"Last Updated: {last_updated}", 
+                      className="text-center text-muted",
+                      style={'fontSize': '1rem', 'marginBottom': '2rem'})
+            ], width=12)
+        ])
+    ], className="mb-4", style={'paddingTop': '1rem'})
+
+
+def create_navigation_sidebar() -> dbc.Offcanvas:
+    """
+    Create collapsible navigation sidebar for mobile devices.
+    
+    Returns:
+        Bootstrap Offcanvas component
+    """
+    nav_items = [
+        {"label": "Overview", "href": "#overview", "icon": "📊"},
+        {"label": "Monthly Carousel", "href": "#monthly-carousel-section", "icon": "📅"},
+        {"label": "Export Data", "href": "#export", "icon": "💾"},
+        {"label": "Help", "href": "#help", "icon": "❓"}
+    ]
+    
+    sidebar_content = [
+        html.H5("Navigation", className="mb-3"),
+        html.Hr(),
+    ]
+    
+    for item in nav_items:
+        sidebar_content.append(
+            dbc.Button([
+                html.Span(item["icon"], className="me-2"),
+                item["label"]
+            ],
+            href=item["href"],
+            color="light",
+            className="mb-2 w-100 text-start",
+            outline=True
+            )
+        )
+    
+    return dbc.Offcanvas(
+        sidebar_content,
+        id="offcanvas-sidebar",
+        title="Dashboard Navigation",
+        is_open=False,
+        placement="start",
+        style={'width': '280px'}
+    )
+
+
+def create_control_panel() -> html.Div:
+    """
+    Create control panel with filters and actions.
+    
+    Returns:
+        Control panel HTML Div
+    """
+    return html.Div([
+        dbc.Card([
+            dbc.CardBody([
+                html.H6("Dashboard Controls", className="card-title mb-3"),
+                dbc.Row([
+                    dbc.Col([
+                        html.Label("View Mode:", className="form-label small"),
+                        dcc.Dropdown(
+                            id='view-mode-dropdown',
+                            options=[
+                                {'label': 'Overview', 'value': 'overview'},
+                                {'label': 'Detailed', 'value': 'detailed'},
+                                {'label': 'Comparison', 'value': 'comparison'}
+                            ],
+                            value='overview',
+                            className="mb-2"
+                        )
+                    ], width=12, md=6),
+                    dbc.Col([
+                        html.Label("Time Range:", className="form-label small"),
+                        dcc.Dropdown(
+                            id='time-range-dropdown',
+                            options=[
+                                {'label': 'Last 6 Months', 'value': '6m'},
+                                {'label': 'Last Year', 'value': '1y'},
+                                {'label': 'Last 2 Years', 'value': '2y'},
+                                {'label': 'All Time', 'value': 'all'}
+                            ],
+                            value='1y',
+                            className="mb-2"
+                        )
+                    ], width=12, md=6)
+                ], className="g-2"),
+                dbc.Row([
+                    dbc.Col([
+                        dbc.ButtonGroup([
+                            dbc.Button("Refresh Data", id="refresh-btn", color="primary", size="sm"),
+                            dbc.Button("Export CSV", id="export-btn", color="secondary", size="sm"),
+                            dbc.Button("☰", id="sidebar-toggle", color="light", size="sm")
+                        ], className="w-100")
+                    ], width=12)
+                ], className="mt-2")
+            ])
+        ], className="shadow-sm mb-4")
+    ])
+
+
+def create_main_content_area(
+    kpi_section: html.Div,
+    gauge_charts: Dict,
+    monthly_carousel: Optional[object] = None
+) -> html.Div:
+    """
+    Create main content area with responsive grid layout.
+    
+    Args:
+        kpi_section: KPI cards section
+        gauge_charts: Dictionary of gauge charts
+        monthly_carousel: Optional monthly carousel component
+    
+    Returns:
+        Main content area HTML Div
+    """
+    content_sections = []
+    
+    # Primary KPI Section (always visible)
+    content_sections.append(
+        html.Section([
+            html.Div(kpi_section, id="overview")
+        ], className="mb-5", **{'aria-label': 'Key Performance Indicators'})
+    )
+    
+    # Gauge Charts Section
+    if gauge_charts:
+        gauge_row = []
+        for chart_name, chart_fig in gauge_charts.items():
+            gauge_row.append(
+                dbc.Col([
+                    dcc.Graph(
+                        figure=chart_fig,
+                        config={
+                            'displayModeBar': False,
+                            'responsive': True
+                        },
+                        className="gauge-chart"
+                    )
+                ], width=12, lg=4, className="mb-3")
+            )
+        
+        content_sections.append(
+            html.Section([
+                html.H3("Accuracy Gauges", 
+                       className="mb-4 text-center",
+                       style={'fontSize': '1.6rem', 'color': '#34495e'}),
+                dbc.Row(gauge_row, className="g-3 justify-content-center")
+            ], className="mb-5", **{'aria-label': 'Accuracy Gauge Charts'})
+        )
+    
+    # Monthly Carousel Section
+    if monthly_carousel:
+        content_sections.append(
+            html.Section([
+                html.Div(monthly_carousel, id="monthly-carousel-section")
+            ], className="mb-5", **{'aria-label': 'Monthly Performance Carousel'})
+        )
+    
+    return html.Div(content_sections)
+
+
+def create_footer_section() -> html.Div:
+    """
+    Create dashboard footer with accessibility and help information.
+    
+    Returns:
+        Footer section HTML Div
+    """
+    return html.Footer([
+        html.Hr(),
+        dbc.Row([
+            dbc.Col([
+                html.P([
+                    "Dashboard built with ",
+                    html.A("Plotly Dash", href="https://dash.plotly.com/", target="_blank"),
+                    " | ",
+                    html.A("Accessibility Info", href="#help", id="accessibility-link"),
+                    " | ",
+                    html.A("Keyboard Shortcuts", href="#help", id="shortcuts-link")
+                ], className="text-muted small mb-0")
+            ], width=12, className="text-center")
+        ])
+    ], className="mt-5 py-3", style={'borderTop': '1px solid #dee2e6'})
+
+
+def create_responsive_layout(
+    primary_metrics: Dict[str, float],
+    kpi_section: html.Div,
+    gauge_charts: Dict,
+    monthly_carousel: Optional[object] = None
+) -> html.Div:
+    """
+    Create the complete responsive dashboard layout.
+    
+    Args:
+        primary_metrics: Primary KPI metrics
+        kpi_section: KPI cards section component
+        gauge_charts: Dictionary of gauge chart figures
+        monthly_carousel: Optional monthly carousel component
+    
+    Returns:
+        Complete dashboard layout
+    """
+    return html.Div([
+        # Store components for callbacks
+        dcc.Store(id='metrics-store', data=primary_metrics),
+        dcc.Store(id='view-state', data={'current_view': 'overview'}),
+        
+        # Navigation sidebar
+        create_navigation_sidebar(),
+        
+        # Main container
+        dbc.Container([
+            # Header section
+            create_header_section(),
+            
+            # Control panel
+            create_control_panel(),
+            
+            # Main content
+            create_main_content_area(
+                kpi_section=kpi_section,
+                gauge_charts=gauge_charts,
+                monthly_carousel=monthly_carousel
+            ),
+            
+            # Footer
+            create_footer_section()
+        ], fluid=True, className="px-3 px-md-4"),
+        
+        # Loading overlay
+        dcc.Loading(
+            id="loading-overlay",
+            type="dot",
+            children=html.Div(id="loading-output"),
+            style={'position': 'fixed', 'top': '50%', 'left': '50%', 'transform': 'translate(-50%, -50%)'}
+        )
+    ], className="dashboard-container")
+
+
+def get_responsive_breakpoints() -> Dict[str, str]:
+    """
+    Get CSS breakpoints for responsive design.
+    
+    Returns:
+        Dictionary of breakpoint definitions
+    """
+    return {
+        'mobile': '(max-width: 767px)',
+        'tablet': '(min-width: 768px) and (max-width: 1199px)',
+        'desktop': '(min-width: 1200px)'
+    }

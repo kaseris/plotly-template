@@ -1,0 +1,317 @@
+/*
+Custom styles for Extraction Accuracy Dashboard
+Responsive design with accessibility features
+*/
+
+/* Global Styles */
+:root {
+  --primary-color: #2c3e50;
+  --secondary-color: #34495e;
+  --success-color: #27ae60;
+  --warning-color: #f39c12;
+  --danger-color: #e74c3c;
+  --light-bg: #f8f9fa;
+  --white: #ffffff;
+  --border-color: #dee2e6;
+  --text-muted: #6c757d;
+  --shadow: 0 2px 4px rgba(0,0,0,0.1);
+  --shadow-lg: 0 4px 8px rgba(0,0,0,0.15);
+  --border-radius: 8px;
+  --font-family: 'Inter', 'Arial', sans-serif;
+}
+
+/* Base Typography */
+body {
+  font-family: var(--font-family);
+  line-height: 1.6;
+  color: var(--primary-color);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+/* Dashboard Container */
+.dashboard-container {
+  min-height: 100vh;
+  background-color: var(--light-bg);
+}
+
+/* Card Enhancements */
+.card {
+  border: none;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* KPI Card Styling */
+.kpi-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: var(--border-radius);
+}
+
+.kpi-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.kpi-trend {
+  font-size: 1.2rem;
+  opacity: 0.9;
+}
+
+.kpi-subtitle {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin-top: 0.5rem;
+}
+
+/* Chart Container Styling */
+.chart-container {
+  background-color: var(--white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.gauge-chart, 
+.quarterly-chart, 
+.monthly-chart {
+  background-color: var(--white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.gauge-chart:hover,
+.quarterly-chart:hover,
+.monthly-chart:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+/* Control Panel */
+.control-panel {
+  background-color: var(--white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  padding: 1rem;
+  margin-bottom: 2rem;
+}
+
+/* Button Styling */
+.btn {
+  border-radius: var(--border-radius);
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn:focus {
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  outline: none;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+/* Navigation Sidebar */
+.offcanvas-sidebar {
+  background-color: var(--white);
+  border-right: 1px solid var(--border-color);
+}
+
+.sidebar-nav-item {
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: var(--border-radius);
+  transition: background-color 0.2s ease-in-out;
+  text-decoration: none;
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-nav-item:hover {
+  background-color: var(--light-bg);
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.sidebar-nav-item.active {
+  background-color: var(--primary-color);
+  color: var(--white);
+}
+
+/* Loading Animation */
+.loading-overlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+}
+
+/* Responsive Design */
+@media (max-width: 767px) {
+  .dashboard-container {
+    padding: 0.5rem;
+  }
+  
+  h1 {
+    font-size: 1.8rem !important;
+  }
+  
+  h2 {
+    font-size: 1.5rem !important;
+  }
+  
+  h3 {
+    font-size: 1.3rem !important;
+  }
+  
+  .kpi-value {
+    font-size: 2rem;
+  }
+  
+  .chart-container,
+  .gauge-chart,
+  .quarterly-chart,
+  .monthly-chart {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  .control-panel {
+    padding: 0.75rem;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .chart-container {
+    padding: 1.25rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .dashboard-container {
+    padding: 1rem 2rem;
+  }
+  
+  .chart-container {
+    padding: 2rem;
+  }
+}
+
+/* Accessibility Enhancements */
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.25rem rgba(44, 62, 80, 0.25);
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .card,
+  .chart-container,
+  .gauge-chart,
+  .quarterly-chart,
+  .monthly-chart {
+    border: 2px solid var(--primary-color) !important;
+  }
+  
+  .btn {
+    border: 2px solid !important;
+  }
+  
+  .kpi-card {
+    border: 2px solid var(--white) !important;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .card:hover {
+    transform: none;
+  }
+}
+
+/* Dark Mode Support (for future implementation) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --light-bg: #1a1a1a;
+    --white: #2d2d2d;
+    --primary-color: #ffffff;
+    --text-muted: #a0a0a0;
+    --border-color: #404040;
+  }
+  
+  body {
+    background-color: var(--light-bg);
+    color: var(--primary-color);
+  }
+}
+
+/* Print Styles */
+@media print {
+  .btn,
+  .offcanvas,
+  .loading-overlay {
+    display: none !important;
+  }
+  
+  .chart-container,
+  .gauge-chart,
+  .quarterly-chart,
+  .monthly-chart {
+    box-shadow: none;
+    border: 1px solid #000;
+    break-inside: avoid;
+  }
+  
+  .dashboard-container {
+    background-color: white !important;
+  }
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--light-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--text-muted);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
+}
