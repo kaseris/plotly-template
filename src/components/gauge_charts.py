@@ -48,6 +48,7 @@ def create_gauge_chart(
     fig = go.Figure(go.Indicator(
         mode="gauge+number",
         value=value,
+        number={'suffix': '%'},
         domain={'x': [0, 1], 'y': [0, 1]},
         title={'text': title, 'font': {'size': 18, 'family': 'Arial, sans-serif'}},
         gauge={
@@ -192,6 +193,7 @@ def create_optimized_gauge_chart(
     fig = go.Figure(go.Indicator(
         mode="gauge+number",
         value=value,
+        number={'suffix': '%'},
         domain={'x': [0, 1], 'y': [0, 1]},
         title={'text': title, 'font': {'size': 16, 'family': 'Inter, Arial, sans-serif'}},
         gauge={
@@ -262,6 +264,7 @@ def create_compact_gauge(
     fig = go.Figure(go.Indicator(
         mode="gauge+number",
         value=value,
+        number={'suffix': '%'},
         domain={'x': [0, 1], 'y': [0, 1]},
         title={'text': title, 'font': {'size': 14}},
         gauge={
@@ -324,6 +327,7 @@ def create_multi_gauge_dashboard(metrics_dict: Dict[str, float]) -> go.Figure:
             go.Indicator(
                 mode="gauge+number",
                 value=value,
+                number={'suffix': '%'},
                 gauge={
                     'axis': {'range': [0, 100]},
                     'bar': {'color': color},

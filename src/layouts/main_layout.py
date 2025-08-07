@@ -52,7 +52,6 @@ def create_navigation_sidebar() -> dbc.Offcanvas:
     nav_items = [
         {"label": "Overview", "href": "#overview", "icon": "📊"},
         {"label": "Monthly Carousel", "href": "#monthly-carousel-section", "icon": "📅"},
-        {"label": "Export Data", "href": "#export", "icon": "💾"},
         {"label": "Help", "href": "#help", "icon": "❓"}
     ]
     
@@ -122,8 +121,9 @@ def create_main_content_area(
     # Compact KPI Section
     content_sections.append(
         html.Section([
+            html.H2("Key Performance Indicators", className="section-heading mb-3"),
             html.Div(kpi_section, id="overview")
-        ], className="mb-3", **{'aria-label': 'Key Performance Indicators'})
+        ], className="mb-4", **{'aria-label': 'Key Performance Indicators'})
     )
     
     # Compact Gauge Charts Section
@@ -143,17 +143,18 @@ def create_main_content_area(
         
         content_sections.append(
             html.Section([
-                html.H3("Accuracy Gauges", className="mb-2 text-center h5"),
+                html.H2("Accuracy Gauges", className="section-heading mb-3 text-center"),
                 dbc.Row(gauge_row, className="g-2 justify-content-center")
-            ], className="mb-3", **{'aria-label': 'Accuracy Gauge Charts'})
+            ], className="mb-4", **{'aria-label': 'Accuracy Gauge Charts'})
         )
     
     # Compact Monthly Carousel Section
     if monthly_carousel:
         content_sections.append(
             html.Section([
+                html.H2("Monthly Performance Overview", className="section-heading mb-3"),
                 html.Div(monthly_carousel, id="monthly-carousel-section")
-            ], className="mb-3", **{'aria-label': 'Monthly Performance Carousel'})
+            ], className="mb-4", **{'aria-label': 'Monthly Performance Carousel'})
         )
     
     # Compact Data Tables Section for Accessibility
@@ -173,28 +174,7 @@ def create_main_content_area(
     return html.Div(content_sections)
 
 
-def create_footer_section() -> html.Div:
-    """
-    Create compact dashboard footer with accessibility and help information.
-    
-    Returns:
-        Footer section HTML Div
-    """
-    return html.Footer([
-        html.Hr(className="my-2"),
-        dbc.Row([
-            dbc.Col([
-                html.P([
-                    "Built with ",
-                    html.A("Plotly Dash", href="https://dash.plotly.com/", target="_blank", className="text-decoration-none"),
-                    " • ",
-                    html.A("Accessibility", href="#help", id="accessibility-link", className="text-decoration-none"),
-                    " • ",
-                    html.A("Shortcuts", href="#help", id="shortcuts-link", className="text-decoration-none")
-                ], className="text-muted small mb-0")
-            ], width=12, className="text-center")
-        ], className="g-0")
-    ], className="mt-3 py-2")
+# Removed: create_footer_section function - footer removed per user request
 
 
 def create_responsive_layout(
@@ -250,8 +230,7 @@ def create_responsive_layout(
                     primary_metrics=primary_metrics
                 ),
                 
-                # Footer
-                create_footer_section()
+                # Footer removed per user request
             ], fluid=True, className="px-3 px-md-4")
         ], id="main-content", role="main", **{"aria-label": "Main dashboard content"}),
         

@@ -4,7 +4,6 @@ Provides tabular representation of chart data for users who cannot access visual
 """
 
 from dash import html, dcc
-import dash_bootstrap_components as dbc
 from typing import Dict, List, Optional
 import pandas as pd
 from src.utils.accessibility_helpers import create_screen_reader_table
@@ -79,14 +78,10 @@ def create_metrics_data_table(
             table
         ], className="metrics-table-container")
     else:
-        # Collapsible table for screen readers
-        return html.Details([
-            html.Summary([
-                html.I(className="fas fa-table me-2"),
-                "View metrics as table"
-            ], className="btn btn-link p-0 mb-2"),
+        # Return table directly without collapsible wrapper
+        return html.Div([
             table
-        ], className="mt-3 screen-reader-table")
+        ], className="mt-3 metrics-table-container screen-reader-enhanced")
 
 
 def create_monthly_data_table(
@@ -185,61 +180,12 @@ def create_monthly_data_table(
     **{"aria-label": f"Monthly performance data for {selected_quarter}"}
     )
     
-    return html.Details([
-        html.Summary([
-            html.I(className="fas fa-table me-2"),
-            f"View {selected_quarter} data as table"
-        ], className="btn btn-link p-0 mb-2"),
+    return html.Div([
         table
     ], className="mt-3 monthly-data-table")
 
 
-def create_export_table_buttons(
-    primary_metrics: Dict[str, float],
-    monthly_data: Optional[pd.DataFrame] = None
-) -> html.Div:
-    """
-    Create buttons for exporting table data.
-    
-    Args:
-        primary_metrics: Primary metrics data
-        monthly_data: Optional monthly data
-    
-    Returns:
-        HTML Div with export buttons
-    """
-    return html.Div([
-        html.H6("Data Export Options", className="mb-2"),
-        dbc.ButtonGroup([
-            dbc.Button([
-                html.I(className="fas fa-download me-2"),
-                "Export Metrics CSV"
-            ], 
-            id="export-metrics-csv",
-            color="outline-secondary",
-            size="sm"),
-            
-            dbc.Button([
-                html.I(className="fas fa-download me-2"),
-                "Export Monthly CSV"
-            ], 
-            id="export-monthly-csv",
-            color="outline-secondary",
-            size="sm",
-            disabled=monthly_data is None or monthly_data.empty),
-            
-            dbc.Button([
-                html.I(className="fas fa-print me-2"),
-                "Print Tables"
-            ], 
-            id="print-tables",
-            color="outline-secondary",
-            size="sm")
-        ], className="mb-3"),
-        
-        html.Small("Tables are optimized for screen readers and assistive technologies", 
-                  className="text-muted")
-    ], className="export-options mt-3")
+# Removed: create_export_table_buttons function - export functionality removed per user request
 
 
 def create_comprehensive_data_view(
@@ -262,14 +208,7 @@ def create_comprehensive_data_view(
     """
     components = []
     
-    # Primary metrics table
-    components.append(html.Div([
-        html.H4("Primary Metrics", className="h5 mb-3"),
-        create_metrics_data_table(
-            primary_metrics, 
-            show_by_default=screen_reader_mode
-        )
-    ]))
+    # Primary metrics table removed per user request - redundant with KPI cards
     
     # Monthly data table if available
     if monthly_data is not None and not monthly_data.empty:
@@ -281,8 +220,7 @@ def create_comprehensive_data_view(
             )
         ]))
     
-    # Export options
-    components.append(create_export_table_buttons(primary_metrics, monthly_data))
+    # Export options removed per user request
     
     # Screen reader instructions
     if screen_reader_mode:

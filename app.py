@@ -394,6 +394,9 @@ app.index_string = '''
             body {
                 font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
                 background-color: var(--bg-secondary);
+                background-image: 
+                    radial-gradient(circle at 2px 2px, rgba(0,0,0,0.02) 1px, transparent 0);
+                background-size: 20px 20px;
                 color: var(--text-primary);
                 font-size: 14px;
                 line-height: 1.4;
@@ -404,6 +407,9 @@ app.index_string = '''
             .light-theme body,
             .dashboard-container.light-theme {
                 background-color: var(--bg-secondary) !important;
+                background-image: 
+                    radial-gradient(circle at 2px 2px, rgba(0,0,0,0.02) 1px, transparent 0) !important;
+                background-size: 20px 20px !important;
                 color: var(--text-primary) !important;
             }
             
@@ -464,6 +470,17 @@ app.index_string = '''
             
             .monthly-chart {
                 min-height: 350px;
+            }
+            
+            /* Section headings consistency */
+            .section-heading {
+                font-size: 1.5rem;
+                font-weight: 600;
+                color: var(--text-primary);
+                margin-bottom: var(--spacing-lg);
+                line-height: 1.3;
+                border-bottom: 2px solid var(--border-light);
+                padding-bottom: var(--spacing-sm);
             }
             
             /* Compact Typography */
