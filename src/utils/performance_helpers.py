@@ -156,7 +156,8 @@ def optimize_plotly_config() -> Dict[str, Any]:
             'resetScale2d',
             'hoverClosestCartesian',
             'hoverCompareCartesian',
-            'toggleSpikelines'
+            'toggleSpikelines',
+            'toImage'  # Disable PNG download functionality
         ],
         
         # Optimize image export options
