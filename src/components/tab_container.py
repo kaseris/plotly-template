@@ -151,7 +151,7 @@ def render_tab_content(active_tab: str) -> html.Div:
             
             content_sections.append(
                 html.Section([
-                    html.H2("Accuracy Gauges", className="section-heading mb-3 text-center"),
+                    html.H2("Quarterly Accuracy", className="section-heading mb-3 text-center"),
                     dbc.Row(gauge_row, className="g-2 justify-content-center")
                 ], className="mb-4", **{'aria-label': 'Accuracy Gauge Charts'})
             )
