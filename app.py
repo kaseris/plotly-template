@@ -1,29 +1,17 @@
-"""
-Extraction Accuracy Dashboard - Main Application
-A comprehensive dashboard for visualizing extraction accuracy metrics with
-responsive design and accessibility features.
-"""
-
 import dash
-from dash import html, dcc, Input, Output, State
+from dash import html
 import dash_bootstrap_components as dbc
-import plotly.express as px
-import plotly.graph_objects as go
-import pandas as pd
 import sys
 import os
 
-# Add src to path for imports
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
-# Import dashboard components
 from src.data.sample_data import get_sample_data
 from src.components.kpi_cards import create_primary_kpi_section
 from src.components.gauge_charts import create_primary_gauges_section
 from src.components.monthly_carousel import create_monthly_carousel
 from src.layouts.main_layout import create_responsive_layout
 
-# Initialize Dash app with Bootstrap theme
 app = dash.Dash(
     __name__,
     external_stylesheets=[
@@ -38,183 +26,26 @@ app = dash.Dash(
     suppress_callback_exceptions=True
 )
 
-# App configuration
 app.title = "Extraction Accuracy Dashboard"
 server = app.server
 
-# Global data loading
 def load_dashboard_data():
-    """Load all dashboard data."""
     try:
         primary_metrics, quarterly_data, monthly_data = get_sample_data()
         return primary_metrics, quarterly_data, monthly_data, None
     except Exception as e:
         error_msg = f"Error loading data: {str(e)}"
-        print(error_msg)  # Log error
-        # Return empty/default data
+        print(error_msg)
         return {
             'extraction_accuracy': 0.0,
             'document_accuracy': 0.0,
             'all_fields_accuracy': 0.0
-        }, pd.DataFrame(), pd.DataFrame(), error_msg
+        }, None, None, error_msg
 
-# Load initial data
 primary_metrics, quarterly_data, monthly_data, data_error = load_dashboard_data()
 
-def create_quarterly_trend_chart(quarterly_data: pd.DataFrame) -> go.Figure:
-    """Create quarterly trend analysis chart."""
-    if quarterly_data.empty:
-        # Return empty chart with message
-        fig = go.Figure()
-        fig.add_annotation(
-            x=0.5, y=0.5,
-            text="No quarterly data available",
-            showarrow=False,
-            font={'size': 16, 'color': 'gray'},
-            xref="paper", yref="paper"
-        )
-        fig.update_layout(
-            height=400,
-            xaxis={'visible': False},
-            yaxis={'visible': False},
-            plot_bgcolor="rgba(0,0,0,0)"
-        )
-        return fig
-    
-    fig = go.Figure()
-    
-    # Add traces for each field with consistent light theme colors
-    fields = ['field_1_accuracy', 'field_2_accuracy', 'field_3_accuracy']
-    colors = ['#0d6efd', '#198754', '#ffc107']  # Light theme colors: blue, success, warning
-    names = ['Field 1', 'Field 2', 'Field 3']
-    
-    for field, color, name in zip(fields, colors, names):
-        if field in quarterly_data.columns:
-            fig.add_trace(go.Scatter(
-                x=quarterly_data['quarter'],
-                y=quarterly_data[field],
-                mode='lines+markers',
-                name=name,
-                line=dict(color=color, width=3),
-                marker=dict(size=8, color=color),
-                hovertemplate=f'<b>{name}</b><br>Quarter: %{{x}}<br>Accuracy: %{{y}}%<extra></extra>'
-            ))
-    
-    fig.update_layout(
-        title=dict(
-            text="Quarterly Field Accuracy Trends",
-            font={'size': 16, 'family': 'Inter, sans-serif', 'color': '#212529'}
-        ),
-        xaxis_title="Quarter",
-        yaxis_title="Accuracy (%)",
-        height=380,  # Compact height
-        margin=dict(l=40, r=20, t=50, b=40),  # Compact margins
-        font={'family': 'Inter, sans-serif', 'size': 11, 'color': '#212529'},
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="#ffffff",
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=-0.15,
-            xanchor="center",
-            x=0.5,
-            font={'size': 10}
-        ),
-        hovermode='x unified',
-        autosize=True
-    )
-    
-    # Add grid and styling with light theme
-    fig.update_xaxes(
-        showgrid=True, 
-        gridcolor='#e9ecef',
-        gridwidth=1,
-        linecolor='#dee2e6'
-    )
-    fig.update_yaxes(
-        showgrid=True, 
-        gridcolor='#e9ecef',
-        gridwidth=1,
-        linecolor='#dee2e6',
-        range=[75, 100]  # Focus on relevant accuracy range
-    )
-    
-    return fig
-
-def create_monthly_heatmap(monthly_data: pd.DataFrame) -> go.Figure:
-    """Create monthly performance heatmap."""
-    if monthly_data.empty:
-        # Return empty chart with message
-        fig = go.Figure()
-        fig.add_annotation(
-            x=0.5, y=0.5,
-            text="No monthly data available",
-            showarrow=False,
-            font={'size': 16, 'color': 'gray'},
-            xref="paper", yref="paper"
-        )
-        fig.update_layout(
-            height=400,
-            xaxis={'visible': False},
-            yaxis={'visible': False},
-            plot_bgcolor="rgba(0,0,0,0)"
-        )
-        return fig
-    
-    # Prepare data for heatmap
-    try:
-        heatmap_data = monthly_data.pivot_table(
-            values='field_1_accuracy',
-            index='year',
-            columns='month',
-            aggfunc='mean'
-        )
-        
-        fig = go.Figure(data=go.Heatmap(
-            z=heatmap_data.values,
-            x=[f"Month {i}" for i in heatmap_data.columns],
-            y=heatmap_data.index,
-            colorscale='RdYlGn',
-            zmin=75,
-            zmax=100,
-            colorbar=dict(title="Accuracy (%)"),
-            hovertemplate='Year: %{y}<br>%{x}<br>Accuracy: %{z:.1f}%<extra></extra>'
-        ))
-        
-        fig.update_layout(
-            title=dict(
-                text="Monthly Field 1 Accuracy Heatmap",
-                font={'size': 16, 'family': 'Inter, sans-serif', 'color': '#212529'}
-            ),
-            xaxis_title="Month",
-            yaxis_title="Year",
-            height=350,  # Compact height
-            margin=dict(l=40, r=20, t=50, b=40),  # Compact margins
-            font={'family': 'Inter, sans-serif', 'size': 11, 'color': '#212529'},
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="#ffffff",
-            autosize=True
-        )
-        
-    except Exception as e:
-        print(f"Error creating heatmap: {e}")
-        # Fallback to simple bar chart
-        fig = px.bar(
-            monthly_data.tail(12),
-            x='date',
-            y='field_1_accuracy',
-            title="Recent Monthly Performance",
-            labels={'date': 'Month', 'field_1_accuracy': 'Field 1 Accuracy (%)'}
-        )
-        fig.update_layout(height=400)
-    
-    return fig
-
-# Create dashboard components
 def create_dashboard_layout():
-    """Create the complete dashboard layout."""
     try:
-        # Create components
         kpi_section = create_primary_kpi_section(primary_metrics)
         gauge_charts = create_primary_gauges_section(primary_metrics)
         monthly_carousel = create_monthly_carousel(
@@ -222,7 +53,6 @@ def create_dashboard_layout():
             selected_quarter="Q1-2025"
         )
         
-        # Return layout
         return create_responsive_layout(
             primary_metrics=primary_metrics,
             kpi_section=kpi_section,
@@ -231,132 +61,15 @@ def create_dashboard_layout():
         )
     except Exception as e:
         print(f"Error creating dashboard layout: {e}")
-        # Return error layout
         return html.Div([
             html.H1("Dashboard Error", className="text-center text-danger"),
             html.P(f"Error: {str(e)}", className="text-center"),
             html.P("Please check that all dependencies are installed.", className="text-center")
         ], className="container mt-5")
 
-# Create main layout
 app.layout = create_dashboard_layout()
 
-# Callbacks for interactivity
-# Removed callbacks for buttons that were removed per user request
-# - offcanvas sidebar toggle
-# - refresh dashboard data  
-# - generate export link
 
-@app.callback(
-    [Output("dashboard-container", "className"),
-     Output("accessibility-state", "data"),
-     Output("normal-theme-btn", "active"),
-     Output("high-contrast-btn", "active"),
-     Output("text-small-btn", "active"),
-     Output("text-normal-btn", "active"),
-     Output("text-large-btn", "active")],
-    [Input("normal-theme-btn", "n_clicks"),
-     Input("high-contrast-btn", "n_clicks"),
-     Input("text-small-btn", "n_clicks"),
-     Input("text-normal-btn", "n_clicks"),
-     Input("text-large-btn", "n_clicks"),
-     Input("accessibility-features", "value")],
-    State("accessibility-state", "data")
-)
-def update_accessibility_settings(normal_clicks, contrast_clicks, small_clicks, 
-                                normal_text_clicks, large_clicks, features, current_state):
-    """Handle accessibility settings changes."""
-    if current_state is None:
-        current_state = {
-            "high_contrast": False,
-            "text_size": "normal",
-            "screen_reader_mode": False,
-            "colorblind_mode": False
-        }
-    
-    ctx = dash.callback_context
-    if not ctx.triggered:
-        # Initial load - ensure light theme
-        base_classes = "dashboard-container light-theme"
-        return (base_classes, current_state, 
-                True, False, False, True, False)  # Normal theme and text active
-    
-    button_id = ctx.triggered[0]['prop_id'].split('.')[0]
-    
-    # Handle theme buttons
-    if button_id == "normal-theme-btn":
-        current_state["high_contrast"] = False
-    elif button_id == "high-contrast-btn":
-        current_state["high_contrast"] = True
-    
-    # Handle text size buttons
-    elif button_id == "text-small-btn":
-        current_state["text_size"] = "small"
-    elif button_id == "text-normal-btn":
-        current_state["text_size"] = "normal"
-    elif button_id == "text-large-btn":
-        current_state["text_size"] = "large"
-    
-    # Handle additional features
-    if features:
-        current_state["screen_reader_mode"] = "screen_reader_mode" in features
-        current_state["colorblind_mode"] = "colorblind_mode" in features
-    else:
-        current_state["screen_reader_mode"] = False
-        current_state["colorblind_mode"] = False
-    
-    # Build CSS classes - ensure light theme is default
-    classes = ["dashboard-container", "light-theme"]
-    
-    if current_state.get("high_contrast", False):
-        classes.append("high-contrast-mode")
-    
-    text_size = current_state.get("text_size", "normal")
-    classes.append(f"text-size-{text_size}")
-    
-    if current_state.get("colorblind_mode", False):
-        classes.append("colorblind-friendly")
-    
-    if current_state.get("screen_reader_mode", False):
-        classes.append("screen-reader-mode")
-    
-    # Button active states
-    theme_normal_active = not current_state.get("high_contrast", False)
-    theme_contrast_active = current_state.get("high_contrast", False)
-    text_small_active = text_size == "small"
-    text_normal_active = text_size == "normal"
-    text_large_active = text_size == "large"
-    
-    return (" ".join(classes), current_state,
-            theme_normal_active, theme_contrast_active,
-            text_small_active, text_normal_active, text_large_active)
-
-@app.callback(
-    Output("keyboard-shortcuts-modal", "is_open"),
-    [Input("keyboard-shortcuts-btn", "n_clicks"),
-     Input("close-shortcuts-modal", "n_clicks")],
-    State("keyboard-shortcuts-modal", "is_open")
-)
-def toggle_shortcuts_modal(open_clicks, close_clicks, is_open):
-    """Toggle keyboard shortcuts modal."""
-    ctx = dash.callback_context
-    if ctx.triggered:
-        return not is_open
-    return is_open
-
-@app.callback(
-    Output("accessibility-collapse", "is_open"),
-    Input("accessibility-toggle", "n_clicks"),
-    State("accessibility-collapse", "is_open")
-)
-def toggle_accessibility_collapse(n_clicks, is_open):
-    """Toggle accessibility options collapse."""
-    if n_clicks:
-        return not is_open
-    return is_open
-
-
-# Add custom CSS - Compact Light Theme
 app.index_string = '''
 <!DOCTYPE html>
 <html>
@@ -367,7 +80,6 @@ app.index_string = '''
         {%css%}
         <style>
             :root {
-                /* Light Theme Color Palette */
                 --bg-primary: #ffffff;
                 --bg-secondary: #f8f9fa;
                 --bg-light: #e9ecef;
@@ -382,8 +94,6 @@ app.index_string = '''
                 --accent-danger: #dc3545;
                 --shadow-light: rgba(0,0,0,0.05);
                 --shadow-medium: rgba(0,0,0,0.1);
-                
-                /* Compact spacing variables */
                 --spacing-xs: 0.25rem;
                 --spacing-sm: 0.5rem;
                 --spacing-md: 0.75rem;
@@ -394,21 +104,18 @@ app.index_string = '''
             body {
                 font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
                 background-color: var(--bg-secondary);
-                background-image: 
-                    radial-gradient(circle at 2px 2px, rgba(0,0,0,0.02) 1px, transparent 0);
+                background-image: radial-gradient(circle at 2px 2px, rgba(0,0,0,0.02) 1px, transparent 0);
                 background-size: 20px 20px;
                 color: var(--text-primary);
                 font-size: 14px;
                 line-height: 1.4;
             }
             
-            /* Ensure light theme is enforced */
             .light-theme,
             .light-theme body,
             .dashboard-container.light-theme {
                 background-color: var(--bg-secondary) !important;
-                background-image: 
-                    radial-gradient(circle at 2px 2px, rgba(0,0,0,0.02) 1px, transparent 0) !important;
+                background-image: radial-gradient(circle at 2px 2px, rgba(0,0,0,0.02) 1px, transparent 0) !important;
                 background-size: 20px 20px !important;
                 color: var(--text-primary) !important;
             }
@@ -426,7 +133,6 @@ app.index_string = '''
                 padding: var(--spacing-md) var(--spacing-sm);
             }
             
-            /* Compact Cards */
             .card {
                 border: 1px solid var(--border-light);
                 border-radius: 6px;
@@ -451,7 +157,6 @@ app.index_string = '''
                 font-size: 0.9rem;
             }
             
-            /* Compact Charts */
             .gauge-chart, .quarterly-chart, .monthly-chart {
                 background-color: var(--bg-primary);
                 border-radius: 6px;
@@ -472,7 +177,6 @@ app.index_string = '''
                 min-height: 350px;
             }
             
-            /* Section headings consistency */
             .section-heading {
                 font-size: 1.5rem;
                 font-weight: 600;
@@ -483,7 +187,6 @@ app.index_string = '''
                 padding-bottom: var(--spacing-sm);
             }
             
-            /* Compact Typography */
             h1 {
                 font-size: 1.75rem;
                 font-weight: 700;
@@ -511,7 +214,6 @@ app.index_string = '''
                 font-size: 0.85rem;
             }
             
-            /* Compact Buttons */
             .btn {
                 padding: var(--spacing-xs) var(--spacing-md);
                 font-size: 0.875rem;
@@ -547,7 +249,6 @@ app.index_string = '''
                 color: white;
             }
             
-            /* Compact Forms */
             .form-control, .form-select {
                 padding: var(--spacing-xs) var(--spacing-sm);
                 font-size: 0.875rem;
@@ -563,7 +264,6 @@ app.index_string = '''
                 margin-bottom: 0.25rem;
             }
             
-            /* Compact Monthly Carousel */
             .monthly-carousel-container {
                 padding: var(--spacing-lg) var(--spacing-sm);
             }
@@ -596,7 +296,6 @@ app.index_string = '''
                 justify-content: space-between;
             }
             
-            /* Compact Navigation */
             .navbar, .nav {
                 padding: var(--spacing-sm) 0;
             }
@@ -611,7 +310,6 @@ app.index_string = '''
                 color: var(--accent-blue);
             }
             
-            /* Accessibility Toolbar Compact */
             .accessibility-toolbar {
                 position: sticky;
                 top: var(--spacing-sm);
@@ -631,7 +329,6 @@ app.index_string = '''
                 font-size: 0.75rem;
             }
             
-            /* Responsive Design */
             @media (max-width: 768px) {
                 .dashboard-container {
                     padding: var(--spacing-sm) var(--spacing-xs);
@@ -661,13 +358,11 @@ app.index_string = '''
                 }
             }
             
-            /* Focus and Accessibility */
             .btn:focus, .form-select:focus, .form-control:focus {
                 box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
                 outline: none;
             }
             
-            /* High contrast support */
             @media (prefers-contrast: high) {
                 :root {
                     --border-light: #000000;
@@ -685,7 +380,6 @@ app.index_string = '''
                 }
             }
             
-            /* Reduced motion support */
             @media (prefers-reduced-motion: reduce) {
                 .month-card, .card, .btn {
                     transition: none;
@@ -705,7 +399,6 @@ app.index_string = '''
 '''
 
 if __name__ == '__main__':
-    # Development server configuration
     debug_mode = os.environ.get('DASH_DEBUG', 'True').lower() == 'true'
     port = int(os.environ.get('PORT', 8050))
     

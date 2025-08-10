@@ -7,9 +7,7 @@ from dash import html, dcc
 import dash_bootstrap_components as dbc
 from typing import Dict, Optional
 import pandas as pd
-from src.components.accessibility_toolbar import create_collapsible_accessibility_toolbar, create_skip_navigation, create_screen_reader_summary
 from src.components.tab_container import create_tab_container
-from src.utils.accessibility_helpers import create_semantic_section, create_live_region
 
 
 def create_header_section(last_updated: Optional[str] = None) -> html.Div:
@@ -83,18 +81,7 @@ def create_navigation_sidebar() -> dbc.Offcanvas:
 
 
 def create_control_panel() -> html.Div:
-    """
-    Create compact control panel with filters and actions.
-    
-    Returns:
-        Control panel HTML Div
-    """
-    return html.Div([
-        # Collapsible accessibility toolbar
-        create_collapsible_accessibility_toolbar(),
-        
-        # Action buttons removed per user request
-    ], id="navigation", role="navigation", **{"aria-label": "Dashboard navigation and accessibility controls"})
+    return html.Div([], id="navigation", role="navigation")
 
 
 def create_main_content_area(
@@ -160,55 +147,28 @@ def create_responsive_layout(
         Complete dashboard layout
     """
     return html.Div([
-        # Skip navigation links
-        create_skip_navigation(),
-        
-        # Store components for callbacks
         dcc.Store(id='metrics-store', data=primary_metrics),
         dcc.Store(id='view-state', data={'current_view': 'overview'}),
         
-        # Screen reader summary
-        create_screen_reader_summary(primary_metrics),
-        
-        # Live regions for dynamic updates
-        create_live_region('status-updates'),
-        create_live_region('error-messages', 'assertive'),
-        
-        # Navigation sidebar
-        create_navigation_sidebar(),
-        
-        # Main container
         html.Main([
             dbc.Container([
-                # Header section
                 create_header_section(),
-                
-                # Control panel
-                create_control_panel(),
-                
-                # Main content
                 create_main_content_area(
                     kpi_section=kpi_section,
                     gauge_charts=gauge_charts,
                     monthly_carousel=monthly_carousel,
                     primary_metrics=primary_metrics
                 ),
-                
-                # Footer removed per user request
             ], fluid=True, className="px-3 px-md-4")
-        ], id="main-content", role="main", **{"aria-label": "Main dashboard content"}),
+        ], id="main-content", role="main"),
         
-        # Loading overlay
         dcc.Loading(
             id="loading-overlay",
             type="dot",
-            children=html.Div(
-                id="loading-output",
-                **{"aria-live": "polite", "aria-label": "Loading dashboard content"}
-            ),
+            children=html.Div(id="loading-output"),
             style={'position': 'fixed', 'top': '50%', 'left': '50%', 'transform': 'translate(-50%, -50%)'}
         )
-    ], id="dashboard-container", className="dashboard-container light-theme", lang="en")
+    ], id="dashboard-container", className="dashboard-container light-theme")
 
 
 def get_responsive_breakpoints() -> Dict[str, str]:
