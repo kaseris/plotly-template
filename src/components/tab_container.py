@@ -166,6 +166,11 @@ def render_tab_content(active_tab: str) -> html.Div:
         from src.components.airline_analysis import create_airline_analysis_tab
         return create_airline_analysis_tab()
         
+    elif active_tab == "tab-3":
+        # Field Analysis tab
+        from src.components.field_analysis import create_field_analysis_tab
+        return create_field_analysis_tab()
+        
     # Default fallback
     return html.Div([
         html.H3("Tab Content Not Found", className="text-center text-muted"),
