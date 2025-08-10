@@ -8,13 +8,13 @@ import dash_bootstrap_components as dbc
 from typing import Optional
 
 
-def create_accessibility_toolbar(
+def create_collapsible_accessibility_toolbar(
     high_contrast_mode: bool = False,
     text_size: str = "normal",
     screen_reader_mode: bool = False
 ) -> html.Div:
     """
-    Create accessibility toolbar with various accessibility controls.
+    Create collapsible accessibility toolbar with various accessibility controls.
     
     Args:
         high_contrast_mode: Whether high contrast mode is enabled
@@ -22,17 +22,29 @@ def create_accessibility_toolbar(
         screen_reader_mode: Whether screen reader mode is enabled
     
     Returns:
-        HTML Div containing accessibility controls
+        HTML Div containing collapsible accessibility controls
     """
     
     return html.Div([
-        dbc.Card([
-            dbc.CardBody([
-                html.Div([
-                    html.H6([
-                        html.I(className="fas fa-universal-access me-2", **{"aria-hidden": "true"}),
-                        "Accessibility Options"
-                    ], className="card-title mb-3"),
+        # Collapse toggle button
+        dbc.Button(
+            [
+                html.I(className="fas fa-universal-access me-2", **{"aria-hidden": "true"}),
+                "Accessibility Options"
+            ],
+            id="accessibility-toggle",
+            color="light",
+            size="sm",
+            outline=True,
+            className="mb-2 w-100 text-start",
+            style={'fontSize': '0.85rem'}
+        ),
+        
+        # Collapsible content
+        dbc.Collapse([
+            dbc.Card([
+                dbc.CardBody([
+                    html.Div([
                     
                     # Theme and contrast controls
                     html.Div([
@@ -128,7 +140,8 @@ def create_accessibility_toolbar(
                     ])
                 ])
             ])
-        ], className="shadow-sm mb-3"),
+        ], className="shadow-sm"),
+        ], id="accessibility-collapse", is_open=False),
         
         # Hidden stores for state management
         dcc.Store(id="accessibility-state", data={

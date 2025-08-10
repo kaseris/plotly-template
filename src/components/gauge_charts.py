@@ -48,6 +48,7 @@ def create_gauge_chart(
     fig = go.Figure(go.Indicator(
         mode="gauge+number",
         value=value,
+        number={'suffix': '%'},
         domain={'x': [0, 1], 'y': [0, 1]},
         title={'text': title, 'font': {'size': 18, 'family': 'Arial, sans-serif'}},
         gauge={
@@ -85,18 +86,15 @@ def create_gauge_chart(
         borderpad=4
     )
     
-    # Optimize layout for performance
+    # Optimize layout for performance - removed duplicate title
     base_layout = {
         'width': size[0],
         'height': size[1],
         'margin': dict(l=20, r=20, t=60, b=40),  # Increased bottom margin for annotation
         'font': {'color': "#333", 'family': 'Arial, sans-serif'},
         'paper_bgcolor': "rgba(0,0,0,0)",
-        'plot_bgcolor': "rgba(0,0,0,0)",
-        'title': {
-            'text': title,
-            'font': {'size': 18, 'family': 'Arial, sans-serif'}
-        }
+        'plot_bgcolor': "rgba(0,0,0,0)"
+        # Removed title from layout - it's already set in go.Indicator
     }
     
     optimized_layout = optimize_chart_layout(base_layout)
@@ -195,6 +193,7 @@ def create_optimized_gauge_chart(
     fig = go.Figure(go.Indicator(
         mode="gauge+number",
         value=value,
+        number={'suffix': '%'},
         domain={'x': [0, 1], 'y': [0, 1]},
         title={'text': title, 'font': {'size': 16, 'family': 'Inter, Arial, sans-serif'}},
         gauge={
@@ -216,18 +215,15 @@ def create_optimized_gauge_chart(
         }
     ))
     
-    # Apply optimized layout
+    # Apply optimized layout - removed duplicate title
     base_layout = {
         'width': 320,
         'height': 250,
         'margin': dict(l=15, r=15, t=45, b=15),
         'font': {'color': "#444", 'family': 'Inter, Arial, sans-serif', 'size': 12},
         'paper_bgcolor': "rgba(0,0,0,0)",
-        'plot_bgcolor': "rgba(0,0,0,0)",
-        'title': {
-            'text': f"{title}<br><sub style='color:{gauge_color}'>{status.title()}</sub>",
-            'font': {'size': 14}
-        }
+        'plot_bgcolor': "rgba(0,0,0,0)"
+        # Removed title from layout - it's already set in go.Indicator
     }
     
     optimized_layout = optimize_chart_layout(base_layout)
@@ -268,6 +264,7 @@ def create_compact_gauge(
     fig = go.Figure(go.Indicator(
         mode="gauge+number",
         value=value,
+        number={'suffix': '%'},
         domain={'x': [0, 1], 'y': [0, 1]},
         title={'text': title, 'font': {'size': 14}},
         gauge={
@@ -330,6 +327,7 @@ def create_multi_gauge_dashboard(metrics_dict: Dict[str, float]) -> go.Figure:
             go.Indicator(
                 mode="gauge+number",
                 value=value,
+                number={'suffix': '%'},
                 gauge={
                     'axis': {'range': [0, 100]},
                     'bar': {'color': color},
