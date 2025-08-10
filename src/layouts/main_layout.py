@@ -8,10 +8,8 @@ import dash_bootstrap_components as dbc
 from typing import Dict, Optional
 import pandas as pd
 from src.components.accessibility_toolbar import create_collapsible_accessibility_toolbar, create_skip_navigation, create_screen_reader_summary
-from src.components.data_table import create_comprehensive_data_view
-from src.components.metrics_dashboard import create_metrics_dashboard
+from src.components.tab_container import create_tab_container
 from src.utils.accessibility_helpers import create_semantic_section, create_live_region
-from src.utils.performance_helpers import optimize_plotly_config
 
 
 def create_header_section(last_updated: Optional[str] = None) -> html.Div:
@@ -100,93 +98,40 @@ def create_control_panel() -> html.Div:
 
 
 def create_main_content_area(
-    kpi_section: html.Div,
-    gauge_charts: Dict,
+    kpi_section: html.Div = None,
+    gauge_charts: Dict = None,
     monthly_carousel: Optional[object] = None,
     primary_metrics: Optional[Dict[str, float]] = None,
     monthly_data: Optional[object] = None
 ) -> html.Div:
     """
-    Create compact main content area with responsive grid layout.
+    Create main content area with tab-based navigation.
     
     Args:
-        kpi_section: KPI cards section
-        gauge_charts: Dictionary of gauge charts
-        monthly_carousel: Optional monthly carousel component
+        kpi_section: KPI cards section (legacy, kept for compatibility)
+        gauge_charts: Dictionary of gauge charts (legacy, kept for compatibility)
+        monthly_carousel: Optional monthly carousel component (legacy, kept for compatibility)
+        primary_metrics: Primary metrics data (legacy, kept for compatibility)
+        monthly_data: Monthly data (legacy, kept for compatibility)
     
     Returns:
-        Main content area HTML Div
+        Main content area HTML Div with tab container
     """
-    content_sections = []
+    # Tab configuration
+    tab_config = [
+        {
+            'id': 'tab-1',
+            'label': 'Accuracy Overview'
+        },
+        {
+            'id': 'tab-2', 
+            'label': 'Airline Analysis'
+        }
+    ]
     
-    # Metrics Dashboard Section with custom grouping
-    custom_group_config = {
-        "groups": [
-            {"title": "Document Processing Overview", "cards_per_row": 2, "use_card_group": False},
-            {"title": "Field Extraction Details", "cards_per_row": 4, "use_card_group": True}
-        ]
-    }
-    
-    content_sections.append(
-        html.Section([
-            create_metrics_dashboard(group_config=custom_group_config)
-        ], className="mb-4", **{'aria-label': 'Document Metrics Dashboard'})
-    )
-    
-    # Compact KPI Section
-    content_sections.append(
-        html.Section([
-            html.H2("Extraction Accuracy", className="section-heading mb-3"),
-            html.Div(kpi_section, id="overview")
-        ], className="mb-4", **{'aria-label': 'Key Performance Indicators'})
-    )
-    
-    # Compact Gauge Charts Section
-    if gauge_charts:
-        gauge_row = []
-        for chart_name, chart_fig in gauge_charts.items():
-            gauge_row.append(
-                dbc.Col([
-                    dcc.Graph(
-                        figure=chart_fig,
-                        config=optimize_plotly_config(),
-                        className="gauge-chart",
-                        id=f"gauge-{chart_name}"
-                    )
-                ], width=12, md=6, lg=4, className="mb-2")
-            )
-        
-        content_sections.append(
-            html.Section([
-                html.H2("Accuracy Gauges", className="section-heading mb-3 text-center"),
-                dbc.Row(gauge_row, className="g-2 justify-content-center")
-            ], className="mb-4", **{'aria-label': 'Accuracy Gauge Charts'})
-        )
-    
-    # Compact Monthly Carousel Section
-    if monthly_carousel:
-        content_sections.append(
-            html.Section([
-                html.H2("Monthly Performance Overview", className="section-heading mb-3"),
-                html.Div(monthly_carousel, id="monthly-carousel-section")
-            ], className="mb-4", **{'aria-label': 'Monthly Performance Carousel'})
-        )
-    
-    # Compact Data Tables Section for Accessibility
-    if primary_metrics:
-        content_sections.append(
-            html.Section([
-                create_comprehensive_data_view(
-                    primary_metrics=primary_metrics,
-                    monthly_data=monthly_data
-                )
-            ], 
-            id="data-tables-section",
-            className="mb-3 screen-reader-enhanced", 
-            **{'aria-label': 'Data tables for screen readers'})
-        )
-    
-    return html.Div(content_sections)
+    return html.Div([
+        create_tab_container(tab_config, default_tab="tab-1")
+    ])
 
 
 # Removed: create_footer_section function - footer removed per user request
