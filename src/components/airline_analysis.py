@@ -34,7 +34,7 @@ def create_airline_histogram() -> dcc.Graph:
         'Complete_Accuracy': [acc * 0.9 for acc in accuracy_values]  # Slightly lower
     })
     
-    # Create histogram
+    # Create grouped bar chart with bars side by side
     fig = px.bar(
         df, 
         x='Airline', 
@@ -42,6 +42,7 @@ def create_airline_histogram() -> dcc.Graph:
         title='Accurate and Complete Accurate Extraction % for Airlines with 20+ Samples',
         labels={'value': 'Extraction %', 'variable': 'Metric Type'},
         color_discrete_map={'Accuracy': '#1f77b4', 'Complete_Accuracy': '#ff7f0e'},
+        barmode='group',  # This creates side-by-side bars instead of stacked
         height=500
     )
     
