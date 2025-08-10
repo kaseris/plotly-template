@@ -57,7 +57,7 @@ def render_tab_content(active_tab: str) -> html.Div:
         Content for the active tab
     """
     if active_tab == "tab-1":
-        # Accuracy Overview tab - using exact components from main branch
+        # Accuracy Overview tab - compact two-column layout
         from src.components.metrics_dashboard import create_metrics_dashboard
         from src.components.kpi_cards import create_primary_kpi_section
         from src.components.gauge_charts import create_primary_gauges_section
@@ -89,10 +89,7 @@ def render_tab_content(active_tab: str) -> html.Div:
             selected_quarter="Q1-2025"
         )
         
-        # Return exact structure from main branch layout
-        content_sections = []
-        
-        # Metrics Dashboard Section with custom grouping
+        # Create metrics dashboard sections grouped in cards
         custom_group_config = {
             "groups": [
                 {"title": "Document Processing Overview", "cards_per_row": 2, "use_card_group": False},
@@ -100,21 +97,44 @@ def render_tab_content(active_tab: str) -> html.Div:
             ]
         }
         
-        content_sections.append(
-            html.Section([
-                create_metrics_dashboard(group_config=custom_group_config)
-            ], className="mb-4", **{'aria-label': 'Document Metrics Dashboard'})
-        )
+        # Prepare metrics dashboard card content
+        metrics_dashboard = create_metrics_dashboard(group_config=custom_group_config)
         
-        # Compact KPI Section
-        content_sections.append(
-            html.Section([
-                html.H2("Extraction Accuracy", className="section-heading mb-3"),
-                html.Div(kpi_section, id="overview")
-            ], className="mb-4", **{'aria-label': 'Key Performance Indicators'})
-        )
+        # Prepare KPI card content (only KPIs, no gauges)
+        kpi_content = [
+            html.H4("Extraction Accuracy", className="card-title mb-3", 
+                   style={'fontWeight': '600', 'color': '#212529'}),
+            kpi_section
+        ]
         
-        # Compact Gauge Charts Section
+        # Create the two-column layout
+        content_sections = [
+            # Two-column row with metrics and KPIs
+            html.Section([
+                dbc.Row([
+                    # Left column - Document Metrics Dashboard (grouped in card)
+                    dbc.Col([
+                        dbc.Card([
+                            dbc.CardBody([
+                                html.H4("Document Extraction Metrics", 
+                                       className="card-title mb-3",
+                                       style={'fontWeight': '600', 'color': '#212529'}),
+                                metrics_dashboard
+                            ])
+                        ], className="h-100")
+                    ], width=12, md=6, className="mb-3"),
+                    
+                    # Right column - Extraction Accuracy KPIs only (grouped in card)
+                    dbc.Col([
+                        dbc.Card([
+                            dbc.CardBody(kpi_content)
+                        ], className="h-100")
+                    ], width=12, md=6, className="mb-3")
+                ], className="g-3")
+            ], className="mb-4", **{'aria-label': 'Dashboard Metrics Overview'})
+        ]
+        
+        # Separate Gauge Charts Section (outside of cards)
         if gauge_charts:
             gauge_row = []
             for chart_name, chart_fig in gauge_charts.items():
@@ -131,12 +151,12 @@ def render_tab_content(active_tab: str) -> html.Div:
             
             content_sections.append(
                 html.Section([
-                    html.H2("Accuracy Gauges", className="section-heading mb-3 text-center"),
+                    html.H2("Quarterly Accuracy", className="section-heading mb-3 text-center"),
                     dbc.Row(gauge_row, className="g-2 justify-content-center")
                 ], className="mb-4", **{'aria-label': 'Accuracy Gauge Charts'})
             )
         
-        # Compact Monthly Carousel Section
+        # Compact Monthly Carousel Section (full width below)
         if monthly_carousel:
             content_sections.append(
                 html.Section([
