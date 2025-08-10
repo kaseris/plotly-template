@@ -2,7 +2,7 @@
 Tab Container component for organizing dashboard content.
 """
 
-from dash import html, dcc, Input, Output, callback
+from dash import html, Input, Output, callback
 import dash_bootstrap_components as dbc
 from typing import Dict, List, Optional, Any
 
@@ -57,87 +57,39 @@ def render_tab_content(active_tab: str) -> html.Div:
         Content for the active tab
     """
     if active_tab == "tab-1":
-        # Accuracy Overview tab - exact copy from single-page branch
+        # Accuracy Overview tab - using exact components from main branch
         from src.components.metrics_dashboard import create_metrics_dashboard
         from src.components.kpi_cards import create_primary_kpi_section
+        from src.components.gauge_charts import create_primary_gauges_section
+        from src.components.monthly_carousel import create_monthly_carousel
         from src.components.data_table import create_comprehensive_data_view
+        from src.data.sample_data import get_sample_data
         from src.utils.performance_helpers import optimize_plotly_config
+        from dash import dcc
         
-        # Sample data matching the original single-page implementation
-        primary_metrics = {
-            'extraction_accuracy': 87.5,
-            'document_accuracy': 92.3,
-            'all_fields_accuracy': 89.1
-        }
+        # Load real data exactly like in main branch
+        try:
+            primary_metrics, _, monthly_data = get_sample_data()
+        except Exception:
+            # Fallback to default data
+            primary_metrics = {
+                'extraction_accuracy': 0.0,
+                'document_accuracy': 0.0,
+                'all_fields_accuracy': 0.0
+            }
+            monthly_data = None
         
-        # Mock gauge charts (would need to be passed from parent in real implementation)
-        import plotly.graph_objects as go
-        
-        def create_sample_gauge(value: float, title: str) -> go.Figure:
-            fig = go.Figure(go.Indicator(
-                mode="gauge+number+delta",
-                value=value,
-                domain={'x': [0, 1], 'y': [0, 1]},
-                title={'text': title},
-                delta={'reference': 85},
-                gauge={'axis': {'range': [None, 100]},
-                       'bar': {'color': "darkblue"},
-                       'steps': [{'range': [0, 70], 'color': "lightgray"},
-                                {'range': [70, 90], 'color': "yellow"}],
-                       'threshold': {'line': {'color': "red", 'width': 4},
-                                   'thickness': 0.75, 'value': 90}}))
-            fig.update_layout(height=300)
-            return fig
-        
-        gauge_charts = {
-            'extraction': create_sample_gauge(87.5, 'Extraction'),
-            'document': create_sample_gauge(92.3, 'Document'), 
-            'fields': create_sample_gauge(89.1, 'Fields')
-        }
-        
-        # Mock monthly carousel
-        monthly_carousel = html.Div([
-            html.H4("Monthly Performance Trends"),
-            dbc.Row([
-                dbc.Col([
-                    dbc.Card([
-                        dbc.CardBody([
-                            html.H5("This Month"),
-                            html.H3("89.2%", className="text-primary")
-                        ])
-                    ])
-                ], width=3),
-                dbc.Col([
-                    dbc.Card([
-                        dbc.CardBody([
-                            html.H5("Last Month"),
-                            html.H3("86.8%", className="text-success")
-                        ])
-                    ])
-                ], width=3),
-                dbc.Col([
-                    dbc.Card([
-                        dbc.CardBody([
-                            html.H5("Best Month"),
-                            html.H3("94.1%", className="text-info")
-                        ])
-                    ])
-                ], width=3),
-                dbc.Col([
-                    dbc.Card([
-                        dbc.CardBody([
-                            html.H5("Average"),
-                            html.H3("88.5%", className="text-secondary")
-                        ])
-                    ])
-                ], width=3)
-            ])
-        ])
-        
-        # Create KPI section
+        # Create components exactly as in main branch
         kpi_section = create_primary_kpi_section(primary_metrics)
+        gauge_charts = create_primary_gauges_section(primary_metrics)
         
-        # Return exact structure from single-page branch
+        # Create monthly carousel with real data
+        monthly_carousel = create_monthly_carousel(
+            monthly_data=monthly_data if monthly_data is not None else None,
+            selected_quarter="Q1-2025"
+        )
+        
+        # Return exact structure from main branch layout
         content_sections = []
         
         # Metrics Dashboard Section with custom grouping
@@ -199,7 +151,7 @@ def render_tab_content(active_tab: str) -> html.Div:
                 html.Section([
                     create_comprehensive_data_view(
                         primary_metrics=primary_metrics,
-                        monthly_data=None
+                        monthly_data=monthly_data
                     )
                 ], 
                 id="data-tables-section",
