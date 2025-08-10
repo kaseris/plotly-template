@@ -148,7 +148,7 @@ def create_primary_kpi_section(primary_metrics: Dict[str, float]) -> html.Div:
         kpi_cards.append(dbc.Col(card, width=12, sm=6, lg=4, className="mb-2"))
     
     return html.Div([
-        html.H2("Key Performance Indicators", 
+        html.H2("Overall Extraction Accuracy", 
                 className="mb-2 h5 text-center",
                 style={'fontWeight': '600', 'color': '#212529'}),
         dbc.Row(kpi_cards, className="g-2")

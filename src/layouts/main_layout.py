@@ -9,6 +9,7 @@ from typing import Dict, Optional
 import pandas as pd
 from src.components.accessibility_toolbar import create_collapsible_accessibility_toolbar, create_skip_navigation, create_screen_reader_summary
 from src.components.data_table import create_comprehensive_data_view
+from src.components.metrics_dashboard import create_metrics_dashboard
 from src.utils.accessibility_helpers import create_semantic_section, create_live_region
 from src.utils.performance_helpers import optimize_plotly_config
 
@@ -118,10 +119,24 @@ def create_main_content_area(
     """
     content_sections = []
     
+    # Metrics Dashboard Section with custom grouping
+    custom_group_config = {
+        "groups": [
+            {"title": "Document Processing Overview", "cards_per_row": 2, "use_card_group": False},
+            {"title": "Field Extraction Details", "cards_per_row": 4, "use_card_group": True}
+        ]
+    }
+    
+    content_sections.append(
+        html.Section([
+            create_metrics_dashboard(group_config=custom_group_config)
+        ], className="mb-4", **{'aria-label': 'Document Metrics Dashboard'})
+    )
+    
     # Compact KPI Section
     content_sections.append(
         html.Section([
-            html.H2("Key Performance Indicators", className="section-heading mb-3"),
+            html.H2("Extraction Accuracy", className="section-heading mb-3"),
             html.Div(kpi_section, id="overview")
         ], className="mb-4", **{'aria-label': 'Key Performance Indicators'})
     )
