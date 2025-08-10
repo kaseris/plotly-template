@@ -12,7 +12,6 @@ def create_kpi_card(
     title: str,
     value: float,
     subtitle: Optional[str] = None,
-    trend: Optional[str] = None,
     color_threshold: Optional[Dict[str, float]] = None
 ) -> dbc.Card:
     """
@@ -22,7 +21,6 @@ def create_kpi_card(
         title: Card title
         value: Primary metric value
         subtitle: Optional subtitle text
-        trend: Optional trend indicator ('up', 'down', 'stable')
         color_threshold: Color coding thresholds {'excellent': 95, 'good': 90}
     
     Returns:
@@ -54,33 +52,14 @@ def create_kpi_card(
         }
         badge_color = 'warning'
     
-    # Compact trend icon
-    trend_icon = ""
-    trend_text = ""
-    if trend == 'up':
-        trend_icon = "▲"
-        trend_text = "Improving"
-    elif trend == 'down':
-        trend_icon = "▼"
-        trend_text = "Declining"
-    elif trend == 'stable':
-        trend_icon = "■"
-        trend_text = "Stable"
-    
     # Compact card content
     card_body = [
         html.Div([
             html.H5(title, className="mb-1", 
                     style={'fontSize': '0.9rem', 'fontWeight': '600', 'color': '#212529'}),
-            html.Div([
-                html.Span(f"{value}%", 
-                         className="fw-bold",
-                         style={'fontSize': '1.8rem', 'color': '#212529'}),
-                dbc.Badge([trend_icon, f" {trend_text}"], 
-                         color=badge_color, 
-                         className="ms-2",
-                         style={'fontSize': '0.7rem'})
-            ], className="d-flex align-items-center justify-content-between")
+            html.Span(f"{value}%", 
+                     className="fw-bold",
+                     style={'fontSize': '1.8rem', 'color': '#212529'})
         ])
     ]
     
@@ -136,14 +115,10 @@ def create_primary_kpi_section(primary_metrics: Dict[str, float]) -> html.Div:
     for config in kpi_configs:
         value = primary_metrics.get(config['key'], 0.0)
         
-        # Simple trend simulation (in real app, this would come from historical data)
-        trend = 'up' if value > 90 else 'stable' if value > 85 else 'down'
-        
         card = create_kpi_card(
             title=config['title'],
             value=value,
-            subtitle=config['subtitle'],
-            trend=trend
+            subtitle=config['subtitle']
         )
         kpi_cards.append(dbc.Col(card, width=12, sm=6, lg=4, className="mb-2"))
     
