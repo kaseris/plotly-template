@@ -2,8 +2,9 @@
 Tab Container component for organizing dashboard content.
 """
 
-from dash import html, Input, Output, callback
+from dash import html, Input, Output, callback, dash_table
 import dash_bootstrap_components as dbc
+import pandas as pd
 from typing import Dict, List, Optional, Any
 
 
@@ -196,3 +197,107 @@ def render_tab_content(active_tab: str) -> html.Div:
         html.H3("Tab Content Not Found", className="text-center text-muted"),
         html.P("The selected tab content is not available.", className="text-center")
     ], className="p-5")
+
+
+# Helper function for airline data
+def get_airline_data():
+    """Get the airline data for filtering."""
+    return [
+        {'Airline_Name': 'Aegean', 'Code': 'A3', 'Documents': 2, 'Accurate_Extraction': 1.00, 'Complete_Accurate_Extraction': 0.80, 'Flight_Number_Accuracy': 1.00, 'Flight_Origin_Accuracy': 0.80, 'Departure_Date_Accuracy': 0.80},
+        {'Airline_Name': 'Aer Lingus', 'Code': 'EI', 'Documents': 5, 'Accurate_Extraction': 0.67, 'Complete_Accurate_Extraction': 0.67, 'Flight_Number_Accuracy': 1.00, 'Flight_Origin_Accuracy': 0.80, 'Departure_Date_Accuracy': 1.00},
+        {'Airline_Name': 'Aeromexico', 'Code': 'AM', 'Documents': 1, 'Accurate_Extraction': 0.91, 'Complete_Accurate_Extraction': 1.00, 'Flight_Number_Accuracy': 0.91, 'Departure_Date_Accuracy': 0.92},
+        {'Airline_Name': 'Air Canada', 'Code': 'AC', 'Documents': 23, 'Accurate_Extraction': 0.76, 'Complete_Accurate_Extraction': 0.48, 'Flight_Number_Accuracy': 1.00, 'Flight_Origin_Accuracy': 0.68, 'Departure_Date_Accuracy': 1.00},
+        {'Airline_Name': 'Air China', 'Code': 'CA', 'Documents': 32, 'Accurate_Extraction': 0.94, 'Complete_Accurate_Extraction': 0.47, 'Flight_Number_Accuracy': 0.91, 'Flight_Origin_Accuracy': 0.68, 'Departure_Date_Accuracy': 0.90},
+        {'Airline_Name': 'Air Europa', 'Code': 'UX', 'Documents': 1, 'Accurate_Extraction': 1.00, 'Complete_Accurate_Extraction': 1.00, 'Flight_Number_Accuracy': 1.00, 'Flight_Origin_Accuracy': 1.00, 'Departure_Date_Accuracy': 0.92},
+        {'Airline_Name': 'Air France', 'Code': 'AF', 'Documents': 28, 'Accurate_Extraction': 0.82, 'Complete_Accurate_Extraction': 0.56, 'Flight_Number_Accuracy': 0.78, 'Flight_Origin_Accuracy': 1.00, 'Departure_Date_Accuracy': 0.90},
+        {'Airline_Name': 'Air India', 'Code': 'AI', 'Documents': 9, 'Accurate_Extraction': 0.76, 'Complete_Accurate_Extraction': 0.79, 'Flight_Number_Accuracy': 0.93, 'Flight_Origin_Accuracy': 1.00, 'Departure_Date_Accuracy': 1.00},
+        {'Airline_Name': 'Air New Zealand', 'Code': 'NZ', 'Documents': 11, 'Accurate_Extraction': 0.92, 'Complete_Accurate_Extraction': 0.56, 'Flight_Number_Accuracy': 0.78, 'Flight_Origin_Accuracy': 1.00, 'Departure_Date_Accuracy': 0.81},
+        {'Airline_Name': 'Air Vanuatu', 'Code': 'VY', 'Documents': 1, 'Accurate_Extraction': 0.00, 'Complete_Accurate_Extraction': 0.92, 'Flight_Number_Accuracy': 0.92, 'Flight_Origin_Accuracy': 0.98, 'Departure_Date_Accuracy': 1.00},
+        {'Airline_Name': 'Air Serbia', 'Code': 'JU', 'Documents': 2, 'Accurate_Extraction': 1.00, 'Complete_Accurate_Extraction': 0.50, 'Flight_Number_Accuracy': 1.00, 'Flight_Origin_Accuracy': 0.60, 'Departure_Date_Accuracy': 1.00},
+        {'Airline_Name': 'Air Transat', 'Code': 'TS', 'Documents': 1, 'Accurate_Extraction': 1.00, 'Complete_Accurate_Extraction': 1.00, 'Flight_Number_Accuracy': 1.60, 'Flight_Origin_Accuracy': 0.50, 'Departure_Date_Accuracy': 1.00},
+        {'Airline_Name': 'AirAsia', 'Code': 'AK', 'Documents': 47, 'Accurate_Extraction': 0.79, 'Complete_Accurate_Extraction': 0.00, 'Flight_Number_Accuracy': 1.00, 'Flight_Origin_Accuracy': 1.60, 'Departure_Date_Accuracy': 1.00},
+        {'Airline_Name': 'Alaska Airlines', 'Code': 'AS', 'Documents': 1, 'Accurate_Extraction': 0.57, 'Complete_Accurate_Extraction': 0.72, 'Flight_Number_Accuracy': 0.94, 'Flight_Origin_Accuracy': 1.00, 'Departure_Date_Accuracy': 0.94},
+        {'Airline_Name': 'All Nippon Airways', 'Code': 'NH', 'Documents': 6, 'Accurate_Extraction': 0.67, 'Complete_Accurate_Extraction': 0.67, 'Flight_Number_Accuracy': 1.00, 'Flight_Origin_Accuracy': 1.00, 'Departure_Date_Accuracy': 0.88},
+        {'Airline_Name': 'Alliance Airlines', 'Code': 'QQ', 'Documents': 2, 'Accurate_Extraction': 1.00, 'Complete_Accurate_Extraction': 1.00, 'Flight_Number_Accuracy': 1.00, 'Flight_Origin_Accuracy': 0.67, 'Departure_Date_Accuracy': 1.00},
+        {'Airline_Name': 'American Airlines', 'Code': 'AA', 'Documents': 35, 'Accurate_Extraction': 0.77, 'Complete_Accurate_Extraction': 0.00, 'Flight_Number_Accuracy': 0.00, 'Flight_Origin_Accuracy': 1.60, 'Departure_Date_Accuracy': 1.00},
+        {'Airline_Name': 'Asiana Airlines', 'Code': 'OZ', 'Documents': 1, 'Accurate_Extraction': 1.00, 'Complete_Accurate_Extraction': 0.37, 'Flight_Number_Accuracy': 0.91, 'Flight_Origin_Accuracy': 1.62, 'Departure_Date_Accuracy': 0.91},
+        {'Airline_Name': 'Austrian Airlines', 'Code': 'OS', 'Documents': 1, 'Accurate_Extraction': 1.00, 'Complete_Accurate_Extraction': 1.00, 'Flight_Number_Accuracy': 1.00, 'Flight_Origin_Accuracy': 1.60, 'Departure_Date_Accuracy': 1.00},
+        {'Airline_Name': 'Batik Air Malaysia', 'Code': 'OD', 'Documents': 70, 'Accurate_Extraction': 0.60, 'Complete_Accurate_Extraction': 1.00, 'Flight_Number_Accuracy': 0.91, 'Flight_Origin_Accuracy': 1.62, 'Departure_Date_Accuracy': 0.90},
+        {'Airline_Name': 'British Airways', 'Code': 'BA', 'Documents': 29, 'Accurate_Extraction': 0.86, 'Complete_Accurate_Extraction': 0.83, 'Flight_Number_Accuracy': 0.86, 'Flight_Origin_Accuracy': 0.56, 'Departure_Date_Accuracy': 1.00}
+    ]
+
+
+# Callback for airline search functionality
+@callback(
+    Output("airline-table-container", "children"),
+    Input("airline-search-input", "value")
+)
+def update_airline_table(search_value: str) -> dash_table.DataTable:
+    """
+    Update the airline table based on search input.
+    
+    Args:
+        search_value: Search term entered by user
+    
+    Returns:
+        Filtered DataTable component
+    """
+    # Get the full airline data
+    airline_data = get_airline_data()
+    
+    # Convert to DataFrame for easier manipulation
+    df = pd.DataFrame(airline_data)
+    
+    # Filter based on search input - only search by airline name and code
+    if search_value and search_value.strip():
+        search_term = search_value.lower().strip()
+        
+        # Create a mask for filtering only by airline name and code
+        mask = (
+            df['Airline_Name'].str.lower().str.contains(search_term, na=False) |
+            df['Code'].str.lower().str.contains(search_term, na=False)
+        )
+        
+        filtered_df = df[mask]
+    else:
+        filtered_df = df
+    
+    # Create and return the filtered table
+    return dash_table.DataTable(
+        data=filtered_df.to_dict('records'),
+        columns=[
+            {'name': 'Airline Name', 'id': 'Airline_Name', 'type': 'text'},
+            {'name': 'Code', 'id': 'Code', 'type': 'text'},
+            {'name': 'Documents', 'id': 'Documents', 'type': 'numeric'},
+            {'name': 'Accurate Extraction', 'id': 'Accurate_Extraction', 'type': 'numeric', 'format': {'specifier': '.2f'}},
+            {'name': 'Complete Accurate', 'id': 'Complete_Accurate_Extraction', 'type': 'numeric', 'format': {'specifier': '.2f'}},
+            {'name': 'Flight Number', 'id': 'Flight_Number_Accuracy', 'type': 'numeric', 'format': {'specifier': '.2f'}},
+            {'name': 'Flight Origin', 'id': 'Flight_Origin_Accuracy', 'type': 'numeric', 'format': {'specifier': '.2f'}},
+            {'name': 'Departure Date', 'id': 'Departure_Date_Accuracy', 'type': 'numeric', 'format': {'specifier': '.2f'}}
+        ],
+        page_size=10,
+        page_action='native',
+        sort_action='native',
+        style_cell={
+            'textAlign': 'left',
+            'padding': '10px',
+            'fontFamily': 'Arial, sans-serif',
+            'fontSize': '14px',
+            'border': '1px solid #dee2e6'
+        },
+        style_header={
+            'backgroundColor': '#f8f9fa',
+            'fontWeight': 'bold',
+            'border': '1px solid #dee2e6'
+        },
+        style_data={
+            'backgroundColor': 'white',
+            'border': '1px solid #dee2e6'
+        },
+        style_data_conditional=[
+            {
+                'if': {'row_index': 'odd'},
+                'backgroundColor': '#f8f9fa'
+            }
+        ]
+    )

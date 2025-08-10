@@ -5,6 +5,7 @@ Airline Analysis component with histogram and paginated table.
 from dash import html, dcc, dash_table
 import plotly.express as px
 import pandas as pd
+import dash_bootstrap_components as dbc
 
 
 def create_airline_histogram() -> dcc.Graph:
@@ -146,7 +147,30 @@ def create_airline_table(page_size: int = 10) -> html.Div:
         html.H4("Airline Extraction Performance Details", 
                 className="mb-3",
                 style={'fontWeight': '600', 'color': '#212529'}),
-        table
+        
+        # Search input field
+        html.Div([
+            dbc.InputGroup([
+                dbc.InputGroupText(
+                    "🔍",
+                    style={'backgroundColor': '#f8f9fa', 'border': '1px solid #dee2e6'}
+                ),
+                dbc.Input(
+                    id="airline-search-input",
+                    placeholder="Search airlines by name or code...",
+                    type="text",
+                    value="",
+                    style={'border': '1px solid #dee2e6'}
+                )
+            ], className="mb-3"),
+            html.Small(
+                "Search by airline name or code",
+                className="text-muted"
+            )
+        ], className="mb-3"),
+        
+        # Add a container for the filtered table
+        html.Div(id="airline-table-container", children=[table])
     ])
 
 
@@ -168,3 +192,5 @@ def create_airline_analysis_tab() -> html.Div:
             create_airline_table()
         ], className="mb-4")
     ], className="p-3")
+
+
