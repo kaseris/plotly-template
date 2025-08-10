@@ -126,6 +126,10 @@ def create_main_content_area(
         {
             'id': 'tab-2', 
             'label': 'Airline Analysis'
+        },
+        {
+            'id': 'tab-3',
+            'label': 'Field Analysis'
         }
     ]
     
