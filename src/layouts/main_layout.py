@@ -8,6 +8,7 @@ import dash_bootstrap_components as dbc
 from typing import Dict, Optional
 import pandas as pd
 from src.components.tab_container import create_tab_container
+from src.components.pdf_export_button import create_pdf_export_button
 
 
 def create_header_section(last_updated: Optional[str] = None) -> html.Div:
@@ -34,8 +35,13 @@ def create_header_section(last_updated: Optional[str] = None) -> html.Div:
                 html.P(f"Last Updated: {last_updated}", 
                       className="text-center text-muted mb-2",
                       **{"aria-live": "polite"})
-            ], width=12)
-        ], className="g-0")
+            ], width=8, className="d-flex flex-column justify-content-center"),
+            dbc.Col([
+                html.Div([
+                    create_pdf_export_button()
+                ], className="d-flex justify-content-end align-items-center h-100")
+            ], width=4)
+        ], className="g-0 align-items-center")
     ], className="mb-3")
 
 
